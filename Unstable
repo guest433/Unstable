@@ -1,1 +1,162 @@
-print("working in process")
+print("work in process")
+
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "ExploitStyleGUI"
+gui.ResetOnSpawn = false
+gui.Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
+
+-- Main Frame (Draggable)
+local main = Instance.new("Frame")
+main.Size = UDim2.new(0.749, 0, 0.878, 0)
+main.Position = UDim2.new(0.1255, 0, 0.061, 0)
+main.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+main.BorderSizePixel = 0
+main.Active = true
+main.Draggable = true
+main.Parent = gui
+
+-- Top Bar
+local topBar = Instance.new("Frame")
+topBar.Size = UDim2.new(1, 0, 0.1, 0)
+topBar.Position = UDim2.new(0, 0, 0, 0)
+topBar.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+topBar.BorderSizePixel = 0
+topBar.Parent = main
+
+-- "Unstable" Label
+local titleLabel = Instance.new("TextLabel")
+titleLabel.Size = UDim2.new(0.8, 0, 1, 0)
+titleLabel.BackgroundTransparency = 1
+titleLabel.Text = "Unstable"
+titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+titleLabel.Font = Enum.Font.GothamBold
+titleLabel.TextScaled = true
+titleLabel.Parent = topBar
+
+-- Destroy Button (With Animation)
+local destroyButton = Instance.new("TextButton")
+destroyButton.Size = UDim2.new(0.1, 0, 1, 0)
+destroyButton.Position = UDim2.new(0.9, 0, 0, 0)
+destroyButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+destroyButton.Text = "X"
+destroyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+destroyButton.Font = Enum.Font.GothamBold
+destroyButton.TextScaled = true
+destroyButton.Parent = topBar
+
+destroyButton.MouseButton1Click:Connect(function()
+    -- Shrink to middle animation before destroying
+    main:TweenSizeAndPosition(
+        UDim2.new(0, 0, 0, 0), -- Shrink to a point
+        UDim2.new(0.5, 0, 0.5, 0), -- Move to the center
+        Enum.EasingDirection.Out,
+        Enum.EasingStyle.Bounce,
+        0.3, -- Animation duration
+        true,
+        function()
+            gui:Destroy() -- Destroy GUI after animation
+        end
+    )
+end)
+
+-- Minimize Button
+local minimizeButton = Instance.new("TextButton")
+minimizeButton.Size = UDim2.new(0.1, 0, 1, 0)
+minimizeButton.Position = UDim2.new(0.8, 0, 0, 0)
+minimizeButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+minimizeButton.Text = "_"
+minimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+minimizeButton.Font = Enum.Font.GothamBold
+minimizeButton.TextScaled = true
+minimizeButton.Parent = topBar
+
+-- Minimized Frame
+local minimizedFrame = Instance.new("Frame")
+minimizedFrame.Size = UDim2.new(0.060, 0, 0.124, 0) -- Fixed square size
+minimizedFrame.Position = UDim2.new(0.02, 0, 0.02, 0)
+minimizedFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+minimizedFrame.BorderSizePixel = 0
+minimizedFrame.Visible = false
+minimizedFrame.Parent = gui
+
+-- Restore Button
+local restoreButton = Instance.new("TextButton")
+restoreButton.Size = UDim2.new(1, 0, 1, 0) -- Full size of minimized frame
+restoreButton.BackgroundTransparency = 0
+restoreButton.Text = "Restore"
+restoreButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+restoreButton.Font = Enum.Font.GothamBold
+restoreButton.TextScaled = true
+restoreButton.Parent = minimizedFrame
+
+restoreButton.MouseButton1Click:Connect(function()
+    minimizedFrame.Visible = false
+    main.Visible = true
+    main.Size = UDim2.new(0, 0, 0, 0) -- Start from a minimized state
+    main.Position = UDim2.new(0.5, 0, 0.5, 0) -- Start from center
+    -- Expand animation
+    main:TweenSizeAndPosition(
+        UDim2.new(0.749, 0, 0.878, 0), -- Original size
+        UDim2.new(0.1255, 0, 0.061, 0), -- Original position
+        Enum.EasingDirection.Out,
+        Enum.EasingStyle.Bounce,
+        0.3 -- Animation duration
+    )
+end)
+
+-- Minimize Functionality with Animation
+minimizeButton.MouseButton1Click:Connect(function()
+    -- Shrink to middle animation before minimizing
+    main:TweenSizeAndPosition(
+        UDim2.new(0, 0, 0, 0), -- Shrink to a point
+        UDim2.new(0.5, 0, 0.5, 0), -- Move to the center
+        Enum.EasingDirection.Out,
+        Enum.EasingStyle.Bounce,
+        0.3, -- Animation duration
+        true,
+        function()
+            main.Visible = false
+            minimizedFrame.Visible = true
+        end
+    )
+end)
+
+-- Side Scrolling Frame (30% of Main Frame)
+local sideScrollingFrame = Instance.new("ScrollingFrame")
+sideScrollingFrame.Size = UDim2.new(0.3, 0, 0.9, 0) -- 30% width
+sideScrollingFrame.Position = UDim2.new(0, 0, 0.1, 0) -- Below top bar
+sideScrollingFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+sideScrollingFrame.BorderSizePixel = 0
+sideScrollingFrame.CanvasSize = UDim2.new(0, 0, 2, 0)
+sideScrollingFrame.ScrollBarThickness = 5
+sideScrollingFrame.Parent = main
+
+-- Content Scrolling Frame (70% of Main Frame)
+local contentScrollingFrame = Instance.new("ScrollingFrame")
+contentScrollingFrame.Size = UDim2.new(0.7, 0, 0.9, 0) -- 70% width
+contentScrollingFrame.Position = UDim2.new(0.3, 0, 0.1, 0) -- Next to side frame
+contentScrollingFrame.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+contentScrollingFrame.BorderSizePixel = 0
+contentScrollingFrame.CanvasSize = UDim2.new(0, 0, 3, 0)
+contentScrollingFrame.ScrollBarThickness = 5
+contentScrollingFrame.ScrollingEnabled = true
+contentScrollingFrame.Parent = main
+
+-- Dynamically Resize CanvasSize
+local function adjustCanvasSize(frame)
+    local maxHeight = 0
+    for _, child in ipairs(frame:GetChildren()) do
+        if child:IsA("GuiObject") then
+            local bottomEdge = child.Position.Y.Offset + child.Size.Y.Offset
+            if bottomEdge > maxHeight then
+                maxHeight = bottomEdge
+            end
+        end
+    end
+    frame.CanvasSize = UDim2.new(0, 0, 0, maxHeight + 10) -- Extra 10 for padding
+end
+
+contentScrollingFrame.ChildAdded:Connect(function()
+    adjustCanvasSize(contentScrollingFrame)
+end)
