@@ -1,4 +1,4 @@
-print("work in process")
+print ("work in process")
 
 local gui = Instance.new("ScreenGui")
 gui.Name = "ExploitStyleGUI"
