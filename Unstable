@@ -61,12 +61,13 @@ destroyButton.MouseButton1Click:Connect(function()
         true,
         function()
             gui:Destroy()
-        end)
+        end
+    )
 end)
 
--- Minimized Frame (Draggable)
+-- Minimized Frame
 local minimizedFrame = Instance.new("Frame")
-minimizedFrame.Size = UDim2.new(1, 0, 2, 0) -- Perfect square
+minimizedFrame.Size = UDim2.new(0.1, 0, 0.2, 0) -- Small enough for mobile
 minimizedFrame.Position = UDim2.new(0.02, 0, 0.02, 0)
 minimizedFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 minimizedFrame.BorderSizePixel = 0
@@ -79,17 +80,30 @@ local uiCorner = Instance.new("UICorner")
 uiCorner.CornerRadius = UDim.new(0.1, 0)
 uiCorner.Parent = minimizedFrame
 
--- Expand Button (Draggable and Displays Image)
+-- Expand Button
 local expandButton = Instance.new("ImageButton")
-expandButton.Size = UDim2.new(1, 0, 2, 0) -- Perfect square
+expandButton.Size = UDim2.new(1, 0, 1, 0)
 expandButton.Position = UDim2.new(0, 0, 0, 0)
 expandButton.BackgroundTransparency = 1
 expandButton.Image = "rbxassetid://114916632097360"
 expandButton.Active = true
-expandButton.Draggable = true
 expandButton.Parent = minimizedFrame
 
+local isDragging = false
+expandButton.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement then
+        isDragging = true
+    end
+end)
+
+expandButton.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement then
+        isDragging = false
+    end
+end)
+
 expandButton.MouseButton1Click:Connect(function()
+    if isDragging then return end -- Prevent opening while dragging
     minimizedFrame.Visible = false
     main.Visible = true
     main.Size = UDim2.new(0, 0, 0, 0)
@@ -125,5 +139,27 @@ minimizeButton.MouseButton1Click:Connect(function()
         function()
             main.Visible = false
             minimizedFrame.Visible = true
-        end)
+        end
+    )
 end)
+
+-- Side Scrolling Frame
+local sideScrollingFrame = Instance.new("ScrollingFrame")
+sideScrollingFrame.Size = UDim2.new(0.3, 0, 0.9, 0) -- 30% width
+sideScrollingFrame.Position = UDim2.new(0, 0, 0.1, 0) -- Below top bar
+sideScrollingFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+sideScrollingFrame.BorderSizePixel = 0
+sideScrollingFrame.CanvasSize = UDim2.new(0, 0, 2, 0)
+sideScrollingFrame.ScrollBarThickness = 5
+sideScrollingFrame.Parent = main
+
+-- Content Scrolling Frame
+local contentScrollingFrame = Instance.new("ScrollingFrame")
+contentScrollingFrame.Size = UDim2.new(0.7, 0, 0.9, 0) -- 70% width
+contentScrollingFrame.Position = UDim2.new(0.3, 0, 0.1, 0) -- Next to side frame
+contentScrollingFrame.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+contentScrollingFrame.BorderSizePixel = 0
+contentScrollingFrame.CanvasSize = UDim2.new(0, 0, 3, 0)
+contentScrollingFrame.ScrollBarThickness = 5
+contentScrollingFrame.ScrollingEnabled = true
+contentScrollingFrame.Parent = main
