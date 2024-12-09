@@ -1,14 +1,19 @@
-print ("work in process")
-
+print("Work in process")
 local gui = Instance.new("ScreenGui")
 gui.Name = "ExploitStyleGUI"
 gui.ResetOnSpawn = false
 gui.Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
 
+local UserInputService = game:GetService("UserInputService")
+local deviceType = UserInputService.TouchEnabled and "Mobile" or "PC"
+
+-- Determine the scale based on the device type
+local guiScale = deviceType == "Mobile" and 1.5 or 1 -- Larger scale for mobile
+
 -- Main Frame (Draggable)
 local main = Instance.new("Frame")
-main.Size = UDim2.new(0.749, 0, 0.878, 0)
-main.Position = UDim2.new(0.1255, 0, 0.061, 0)
+main.Size = UDim2.new(0.6 * guiScale, 0, 0.8 * guiScale, 0)
+main.Position = UDim2.new((1 - main.Size.X.Scale) / 2, 0, (1 - main.Size.Y.Scale) / 2, 0)
 main.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 main.BorderSizePixel = 0
 main.Active = true
@@ -58,7 +63,38 @@ destroyButton.MouseButton1Click:Connect(function()
     )
 end)
 
--- Minimize Button (TextButton)
+-- Minimized Frame
+local minimizedFrame = Instance.new("Frame")
+minimizedFrame.Size = UDim2.new(0.2 * guiScale, 0, 0.2 * guiScale, 0)
+minimizedFrame.Position = UDim2.new(0.02, 0, 0.02, 0)
+minimizedFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+minimizedFrame.BorderSizePixel = 0
+minimizedFrame.Visible = false
+minimizedFrame.Parent = gui
+
+-- Expand Button
+local expandButton = Instance.new("ImageButton")
+expandButton.Size = UDim2.new(0.9, 0, 0.9, 0)
+expandButton.Position = UDim2.new(0.05, 0, 0.05, 0)
+expandButton.BackgroundTransparency = 1
+expandButton.Image = "rbxassetid://114916632097360"
+expandButton.Parent = minimizedFrame
+
+expandButton.MouseButton1Click:Connect(function()
+    minimizedFrame.Visible = false
+    main.Visible = true
+    main.Size = UDim2.new(0, 0, 0, 0)
+    main.Position = UDim2.new(0.5, 0, 0.5, 0)
+    main:TweenSizeAndPosition(
+        UDim2.new(0.6 * guiScale, 0, 0.8 * guiScale, 0),
+        UDim2.new((1 - main.Size.X.Scale) / 2, 0, (1 - main.Size.Y.Scale) / 2, 0),
+        Enum.EasingDirection.Out,
+        Enum.EasingStyle.Linear,
+        0.3
+    )
+end)
+
+-- Minimize Button
 local minimizeButton = Instance.new("TextButton")
 minimizeButton.Size = UDim2.new(0.1, 0, 1, 0)
 minimizeButton.Position = UDim2.new(0.8, 0, 0, 0)
@@ -69,40 +105,6 @@ minimizeButton.Font = Enum.Font.GothamBold
 minimizeButton.TextScaled = true
 minimizeButton.Parent = topBar
 
--- Minimized Frame
-local minimizedFrame = Instance.new("Frame")
-minimizedFrame.Size = UDim2.new(0.060, 0, 0.124, 0)
-minimizedFrame.Position = UDim2.new(0.02, 0, 0.02, 0)
-minimizedFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-minimizedFrame.BorderSizePixel = 0
-minimizedFrame.Visible = false
-minimizedFrame.Parent = gui
-
--- Expand Button (Draggable ImageButton)
-local expandButton = Instance.new("ImageButton")
-expandButton.Size = UDim2.new(1.2, 0, 2.4, 0) -- Updated size
-expandButton.Position = UDim2.new(0.05, 0, 0.05, 0)
-expandButton.BackgroundTransparency = 1
-expandButton.Image = "rbxassetid://114916632097360" -- Updated image ID
-expandButton.Active = true
-expandButton.Draggable = true
-expandButton.Parent = minimizedFrame
-
-expandButton.MouseButton1Click:Connect(function()
-    minimizedFrame.Visible = false
-    main.Visible = true
-    main.Size = UDim2.new(0, 0, 0, 0)
-    main.Position = UDim2.new(0.5, 0, 0.5, 0)
-    main:TweenSizeAndPosition(
-        UDim2.new(0.749, 0, 0.878, 0),
-        UDim2.new(0.1255, 0, 0.061, 0),
-        Enum.EasingDirection.Out,
-        Enum.EasingStyle.Linear,
-        0.3
-    )
-end)
-
--- Minimize Functionality
 minimizeButton.MouseButton1Click:Connect(function()
     main:TweenSizeAndPosition(
         UDim2.new(0, 0, 0, 0),
@@ -110,59 +112,6 @@ minimizeButton.MouseButton1Click:Connect(function()
         Enum.EasingDirection.Out,
         Enum.EasingStyle.Linear,
         0.3,
-        true,
-        function()
-            main.Visible = false
-            minimizedFrame.Visible = true
-        end
-    )
-end)
-
--- Side Scrolling Frame (30% of Main Frame)
-local sideScrollingFrame = Instance.new("ScrollingFrame")
-sideScrollingFrame.Size = UDim2.new(0.3, 0, 0.9, 0)
-sideScrollingFrame.Position = UDim2.new(0, 0, 0.1, 0)
-sideScrollingFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-sideScrollingFrame.BorderSizePixel = 0
-sideScrollingFrame.CanvasSize = UDim2.new(0, 0, 2, 0)
-sideScrollingFrame.ScrollBarThickness = 5
-sideScrollingFrame.Parent = main
-
--- Content Scrolling Frame (70% of Main Frame)
-local contentScrollingFrame = Instance.new("ScrollingFrame")
-contentScrollingFrame.Size = UDim2.new(0.7, 0, 0.9, 0)
-contentScrollingFrame.Position = UDim2.new(0.3, 0, 0.1, 0)
-contentScrollingFrame.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-contentScrollingFrame.BorderSizePixel = 0
-contentScrollingFrame.CanvasSize = UDim2.new(0, 0, 3, 0)
-contentScrollingFrame.ScrollBarThickness = 5
-contentScrollingFrame.ScrollingEnabled = true
-contentScrollingFrame.Parent = main
-
--- Dynamically Resize CanvasSize
-local function adjustCanvasSize(frame)
-    local maxHeight = 0
-    for _, child in ipairs(frame:GetChildren()) do
-        if child:IsA("GuiObject") then
-            local bottomEdge = child.Position.Y.Offset + child.Size.Y.Offset
-            if bottomEdge > maxHeight then
-                maxHeight = bottomEdge
-            end
-        end
-    end
-    frame.CanvasSize = UDim2.new(0, 0, 0, maxHeight + 10)
-end
-
-contentScrollingFrame.ChildAdded:Connect(function()
-    adjustCanvasSize(contentScrollingFrame)
-end)
-    -- Shrink to middle animation before minimizing
-    main:TweenSizeAndPosition(
-        UDim2.new(0, 0, 0, 0), -- Shrink to a point
-        UDim2.new(0.5, 0, 0.5, 0), -- Move to the center
-        Enum.EasingDirection.Out,
-        Enum.EasingStyle.Bounce,
-        0.3, -- Animation duration
         true,
         function()
             main.Visible = false
@@ -192,7 +141,7 @@ contentScrollingFrame.ScrollBarThickness = 5
 contentScrollingFrame.ScrollingEnabled = true
 contentScrollingFrame.Parent = main
 
--- Dynamically Resize CanvasSize
+-- Adjust Canvas Size Dynamically
 local function adjustCanvasSize(frame)
     local maxHeight = 0
     for _, child in ipairs(frame:GetChildren()) do
