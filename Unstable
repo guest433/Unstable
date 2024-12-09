@@ -5,13 +5,12 @@ gui.ResetOnSpawn = false
 gui.Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
 
 local UserInputService = game:GetService("UserInputService")
-local TweenService = game:GetService("TweenService")
 local deviceType = UserInputService.TouchEnabled and "Mobile" or "PC"
 
 -- Determine GUI scale and position based on device type
 local frameSize = deviceType == "Mobile" and UDim2.new(0.8, 0, 0.9, 0) or UDim2.new(0.6, 0, 0.7, 0)
 
--- Main Frame
+-- Main Frame (Draggable)
 local main = Instance.new("Frame")
 main.Size = frameSize
 main.Position = UDim2.new((1 - frameSize.X.Scale) / 2, 0, (1 - frameSize.Y.Scale) / 2, 0)
@@ -22,6 +21,7 @@ main.Draggable = true
 main.Visible = true
 main.Parent = gui
 
+-- UICorner for Main Frame
 local uiCorner = Instance.new("UICorner")
 uiCorner.CornerRadius = UDim.new(0.05, 0)
 uiCorner.Parent = main
@@ -33,14 +33,9 @@ topBar.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 topBar.BorderSizePixel = 0
 topBar.Parent = main
 
-local topBarCorner = Instance.new("UICorner")
-topBarCorner.CornerRadius = UDim.new(0.05, 0)
-topBarCorner.Parent = topBar
-
 -- Title Label
 local titleLabel = Instance.new("TextLabel")
 titleLabel.Size = UDim2.new(0.8, 0, 1, 0)
-titleLabel.Position = UDim2.new(0.05, 0, 0, 0)
 titleLabel.BackgroundTransparency = 1
 titleLabel.Text = "Unstable"
 titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -50,11 +45,11 @@ titleLabel.Parent = topBar
 
 -- Destroy Button
 local destroyButton = Instance.new("TextButton")
-destroyButton.Size = UDim2.new(0.08, 0, 0.8, 0)
-destroyButton.Position = UDim2.new(0.9, -10, 0.1, 0)
+destroyButton.Size = UDim2.new(0.1, 0, 1, 0)
+destroyButton.Position = UDim2.new(0.9, 0, 0, 0)
 destroyButton.BackgroundTransparency = 1
 destroyButton.Text = "X"
-destroyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+destroyButton.TextColor3 = Color3.fromRGB(255, 0, 0)
 destroyButton.Font = Enum.Font.GothamBold
 destroyButton.TextScaled = true
 destroyButton.Parent = topBar
@@ -63,51 +58,9 @@ destroyButton.MouseButton1Click:Connect(function()
     gui:Destroy()
 end)
 
--- Minimize Button
-local minimizeButton = Instance.new("TextButton")
-minimizeButton.Size = UDim2.new(0.08, 0, 0.8, 0)
-minimizeButton.Position = UDim2.new(0.8, -10, 0.1, 0)
-minimizeButton.BackgroundTransparency = 1
-minimizeButton.Text = "-"
-minimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-minimizeButton.Font = Enum.Font.GothamBold
-minimizeButton.TextScaled = true
-minimizeButton.Parent = topBar
-
-minimizeButton.MouseButton1Click:Connect(function()
-    main.Visible = false
-    minimizedFrame.Visible = true
-end)
-
--- Side ScrollingFrame
-local sideScrollingFrame = Instance.new("ScrollingFrame")
-sideScrollingFrame.Size = UDim2.new(0.3, 0, 0.9, 0)
-sideScrollingFrame.Position = UDim2.new(0, 0, 0.1, 0)
-sideScrollingFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-sideScrollingFrame.ScrollBarThickness = 6
-sideScrollingFrame.Parent = main
-
-local sideStroke = Instance.new("UIStroke")
-sideStroke.Thickness = 0.2
-sideStroke.Color = Color3.fromRGB(255, 0, 0)
-sideStroke.Parent = sideScrollingFrame
-
--- Content ScrollingFrame
-local contentScrollingFrame = Instance.new("ScrollingFrame")
-contentScrollingFrame.Size = UDim2.new(0.7, 0, 0.9, 0)
-contentScrollingFrame.Position = UDim2.new(0.3, 0, 0.1, 0)
-contentScrollingFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-contentScrollingFrame.ScrollBarThickness = 6
-contentScrollingFrame.Parent = main
-
-local contentStroke = Instance.new("UIStroke")
-contentStroke.Thickness = 0.2
-contentStroke.Color = Color3.fromRGB(255, 0, 0)
-contentStroke.Parent = contentScrollingFrame
-
 -- Minimized Frame
 local minimizedFrame = Instance.new("Frame")
-minimizedFrame.Size = UDim2.new(0.06, 0, 0.145, 0)
+minimizedFrame.Size = UDim2.new(0.06, 0, 0.145, 0) -- A perfect square
 minimizedFrame.Position = UDim2.new(0.02, 0, 0.02, 0)
 minimizedFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 minimizedFrame.BorderSizePixel = 0
@@ -119,41 +72,85 @@ local minimizedCorner = Instance.new("UICorner")
 minimizedCorner.CornerRadius = UDim.new(0.2, 0)
 minimizedCorner.Parent = minimizedFrame
 
+-- Expand Button (TextButton)
 local expandButton = Instance.new("TextButton")
 expandButton.Size = UDim2.new(1, 0, 1, 0)
 expandButton.BackgroundTransparency = 0
 expandButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 expandButton.Font = Enum.Font.GothamBold
+expandButton.RichText = true
 expandButton.TextScaled = true
-expandButton.Text = "Unstable"
+expandButton.Text = '<font color="rgb(0, 0, 255)">Un</font><font color="rgb(20, 20, 30)">sta</font><font color="rgb(255, 0, 0)">ble</font>'
 expandButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 expandButton.Parent = minimizedFrame
 
-expandButton.MouseButton1Click:Connect(function()
-    minimizedFrame.Visible = false
-    main.Visible = true
-    main.Position = main.Position -- Retains its position
-end)
+-- Dragging Logic for Minimized Frame
+local isDragging = false
+local dragInput, dragStart, startPos
 
--- Notification System
-local function notify(message, duration)
-    local notification = Instance.new("TextLabel")
-    notification.Size = UDim2.new(0.3, 0, 0.1, 0)
-    notification.Position = UDim2.new(0.35, 0, 0.8, 0)
-    notification.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-    notification.BorderColor3 = Color3.fromRGB(255, 0, 0)
-    notification.Text = message
-    notification.TextColor3 = Color3.fromRGB(255, 255, 255)
-    notification.Font = Enum.Font.Gotham
-    notification.TextScaled = true
-    notification.Parent = gui
-
-    local uiCorner = Instance.new("UICorner")
-    uiCorner.CornerRadius = UDim.new(0.05, 0)
-    uiCorner.Parent = notification
-
-    wait(duration or 3)
-    notification:Destroy()
+local function onInputBegan(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        isDragging = true
+        dragStart = input.Position
+        startPos = minimizedFrame.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                isDragging = false
+            end
+        end)
+    end
 end
 
-notify("Hello! Notification active.", 3)
+local function onInputChanged(input)
+    if isDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        local delta = input.Position - dragStart
+        minimizedFrame.Position = UDim2.new(
+            startPos.X.Scale,
+            startPos.X.Offset + delta.X,
+            startPos.Y.Scale,
+            startPos.Y.Offset + delta.Y
+        )
+    end
+end
+
+expandButton.InputBegan:Connect(onInputBegan)
+expandButton.InputChanged:Connect(onInputChanged)
+expandButton.MouseButton1Click:Connect(function()
+    if isDragging then return end
+    minimizedFrame.Visible = false
+    main.Visible = true
+    main.Position = main.Position -- Restore position from before minimization
+    main:TweenSizeAndPosition(
+        frameSize,
+        main.Position,
+        Enum.EasingDirection.Out,
+        Enum.EasingStyle.Linear,
+        0.3
+    )
+end)
+
+-- Minimize Button
+local minimizeButton = Instance.new("TextButton")
+minimizeButton.Size = UDim2.new(0.1, 0, 1, 0)
+minimizeButton.Position = UDim2.new(0.8, 0, 0, 0)
+minimizeButton.BackgroundTransparency = 1
+minimizeButton.Text = "-"
+minimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+minimizeButton.Font = Enum.Font.GothamBold
+minimizeButton.TextScaled = true
+minimizeButton.Parent = topBar
+
+minimizeButton.MouseButton1Click:Connect(function()
+    main:TweenSizeAndPosition(
+        UDim2.new(0, 0, 0, 0),
+        main.Position,
+        Enum.EasingDirection.Out,
+        Enum.EasingStyle.Linear,
+        0.3,
+        true,
+        function()
+            main.Visible = false
+            minimizedFrame.Visible = true
+        end
+    )
+end)
