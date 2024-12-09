@@ -1,4 +1,5 @@
 print("Work in process")
+
 local gui = Instance.new("ScreenGui")
 gui.Name = "ExploitStyleGUI"
 gui.ResetOnSpawn = false
@@ -7,12 +8,13 @@ gui.Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
 local UserInputService = game:GetService("UserInputService")
 local deviceType = UserInputService.TouchEnabled and "Mobile" or "PC"
 
--- Determine the scale based on the device type
-local guiScale = deviceType == "Mobile" and 1.5 or 1 -- Larger scale for mobile
+-- Determine GUI scale and position based on device type
+local guiScale = deviceType == "Mobile" and 1.5 or 1
+local frameSize = deviceType == "Mobile" and UDim2.new(0.7, 0, 0.9, 0) or UDim2.new(0.5, 0, 0.7, 0)
 
 -- Main Frame (Draggable)
 local main = Instance.new("Frame")
-main.Size = UDim2.new(0.6 * guiScale, 0, 0.8 * guiScale, 0)
+main.Size = frameSize
 main.Position = UDim2.new((1 - main.Size.X.Scale) / 2, 0, (1 - main.Size.Y.Scale) / 2, 0)
 main.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 main.BorderSizePixel = 0
@@ -28,7 +30,7 @@ topBar.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 topBar.BorderSizePixel = 0
 topBar.Parent = main
 
--- "Unstable" Label
+-- Title Label
 local titleLabel = Instance.new("TextLabel")
 titleLabel.Size = UDim2.new(0.8, 0, 1, 0)
 titleLabel.BackgroundTransparency = 1
@@ -59,25 +61,32 @@ destroyButton.MouseButton1Click:Connect(function()
         true,
         function()
             gui:Destroy()
-        end
-    )
+        end)
 end)
 
--- Minimized Frame
+-- Minimized Frame (Draggable)
 local minimizedFrame = Instance.new("Frame")
-minimizedFrame.Size = UDim2.new(0.2 * guiScale, 0, 0.2 * guiScale, 0)
+minimizedFrame.Size = UDim2.new(1, 0, 2, 0) -- Perfect square
 minimizedFrame.Position = UDim2.new(0.02, 0, 0.02, 0)
 minimizedFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 minimizedFrame.BorderSizePixel = 0
 minimizedFrame.Visible = false
+minimizedFrame.Active = true
+minimizedFrame.Draggable = true
 minimizedFrame.Parent = gui
 
--- Expand Button
+local uiCorner = Instance.new("UICorner")
+uiCorner.CornerRadius = UDim.new(0.1, 0)
+uiCorner.Parent = minimizedFrame
+
+-- Expand Button (Draggable and Displays Image)
 local expandButton = Instance.new("ImageButton")
-expandButton.Size = UDim2.new(0.9, 0, 0.9, 0)
-expandButton.Position = UDim2.new(0.05, 0, 0.05, 0)
+expandButton.Size = UDim2.new(1, 0, 2, 0) -- Perfect square
+expandButton.Position = UDim2.new(0, 0, 0, 0)
 expandButton.BackgroundTransparency = 1
 expandButton.Image = "rbxassetid://114916632097360"
+expandButton.Active = true
+expandButton.Draggable = true
 expandButton.Parent = minimizedFrame
 
 expandButton.MouseButton1Click:Connect(function()
@@ -86,8 +95,8 @@ expandButton.MouseButton1Click:Connect(function()
     main.Size = UDim2.new(0, 0, 0, 0)
     main.Position = UDim2.new(0.5, 0, 0.5, 0)
     main:TweenSizeAndPosition(
-        UDim2.new(0.6 * guiScale, 0, 0.8 * guiScale, 0),
-        UDim2.new((1 - main.Size.X.Scale) / 2, 0, (1 - main.Size.Y.Scale) / 2, 0),
+        frameSize,
+        UDim2.new((1 - frameSize.X.Scale) / 2, 0, (1 - frameSize.Y.Scale) / 2, 0),
         Enum.EasingDirection.Out,
         Enum.EasingStyle.Linear,
         0.3
@@ -116,45 +125,5 @@ minimizeButton.MouseButton1Click:Connect(function()
         function()
             main.Visible = false
             minimizedFrame.Visible = true
-        end
-    )
-end)
-
--- Side Scrolling Frame (30% of Main Frame)
-local sideScrollingFrame = Instance.new("ScrollingFrame")
-sideScrollingFrame.Size = UDim2.new(0.3, 0, 0.9, 0) -- 30% width
-sideScrollingFrame.Position = UDim2.new(0, 0, 0.1, 0) -- Below top bar
-sideScrollingFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-sideScrollingFrame.BorderSizePixel = 0
-sideScrollingFrame.CanvasSize = UDim2.new(0, 0, 2, 0)
-sideScrollingFrame.ScrollBarThickness = 5
-sideScrollingFrame.Parent = main
-
--- Content Scrolling Frame (70% of Main Frame)
-local contentScrollingFrame = Instance.new("ScrollingFrame")
-contentScrollingFrame.Size = UDim2.new(0.7, 0, 0.9, 0) -- 70% width
-contentScrollingFrame.Position = UDim2.new(0.3, 0, 0.1, 0) -- Next to side frame
-contentScrollingFrame.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-contentScrollingFrame.BorderSizePixel = 0
-contentScrollingFrame.CanvasSize = UDim2.new(0, 0, 3, 0)
-contentScrollingFrame.ScrollBarThickness = 5
-contentScrollingFrame.ScrollingEnabled = true
-contentScrollingFrame.Parent = main
-
--- Adjust Canvas Size Dynamically
-local function adjustCanvasSize(frame)
-    local maxHeight = 0
-    for _, child in ipairs(frame:GetChildren()) do
-        if child:IsA("GuiObject") then
-            local bottomEdge = child.Position.Y.Offset + child.Size.Y.Offset
-            if bottomEdge > maxHeight then
-                maxHeight = bottomEdge
-            end
-        end
-    end
-    frame.CanvasSize = UDim2.new(0, 0, 0, maxHeight + 10) -- Extra 10 for padding
-end
-
-contentScrollingFrame.ChildAdded:Connect(function()
-    adjustCanvasSize(contentScrollingFrame)
+        end)
 end)
