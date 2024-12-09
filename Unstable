@@ -6,13 +6,12 @@ gui.Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
 
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
-
 local deviceType = UserInputService.TouchEnabled and "Mobile" or "PC"
 
 -- Determine GUI scale and position based on device type
 local frameSize = deviceType == "Mobile" and UDim2.new(0.8, 0, 0.9, 0) or UDim2.new(0.6, 0, 0.7, 0)
 
--- Main Frame (Draggable)
+-- Main Frame
 local main = Instance.new("Frame")
 main.Size = frameSize
 main.Position = UDim2.new((1 - frameSize.X.Scale) / 2, 0, (1 - frameSize.Y.Scale) / 2, 0)
@@ -23,7 +22,6 @@ main.Draggable = true
 main.Visible = true
 main.Parent = gui
 
--- UICorner for Main Frame
 local uiCorner = Instance.new("UICorner")
 uiCorner.CornerRadius = UDim.new(0.05, 0)
 uiCorner.Parent = main
@@ -35,9 +33,14 @@ topBar.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 topBar.BorderSizePixel = 0
 topBar.Parent = main
 
+local topBarCorner = Instance.new("UICorner")
+topBarCorner.CornerRadius = UDim.new(0.05, 0)
+topBarCorner.Parent = topBar
+
 -- Title Label
 local titleLabel = Instance.new("TextLabel")
 titleLabel.Size = UDim2.new(0.8, 0, 1, 0)
+titleLabel.Position = UDim2.new(0.05, 0, 0, 0)
 titleLabel.BackgroundTransparency = 1
 titleLabel.Text = "Unstable"
 titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -47,11 +50,11 @@ titleLabel.Parent = topBar
 
 -- Destroy Button
 local destroyButton = Instance.new("TextButton")
-destroyButton.Size = UDim2.new(0.1, 0, 1, 0)
-destroyButton.Position = UDim2.new(0.9, 0, 0, 0)
+destroyButton.Size = UDim2.new(0.08, 0, 0.8, 0)
+destroyButton.Position = UDim2.new(0.9, -10, 0.1, 0)
 destroyButton.BackgroundTransparency = 1
 destroyButton.Text = "X"
-destroyButton.TextColor3 = Color3.fromRGB(255, 0, 0)
+destroyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 destroyButton.Font = Enum.Font.GothamBold
 destroyButton.TextScaled = true
 destroyButton.Parent = topBar
@@ -60,82 +63,97 @@ destroyButton.MouseButton1Click:Connect(function()
     gui:Destroy()
 end)
 
--- Scrolling Frame for Tabs
-local scrollingFrame = Instance.new("ScrollingFrame")
-scrollingFrame.Name = "ScrollingFrame"
-scrollingFrame.Parent = main
-scrollingFrame.Size = UDim2.new(1, 0, 0.1, 0)
-scrollingFrame.Position = UDim2.new(0, 0, 0.1, 0)
-scrollingFrame.CanvasSize = UDim2.new(2, 0, 0, 0)
-scrollingFrame.ScrollBarThickness = 3
-scrollingFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+-- Minimize Button
+local minimizeButton = Instance.new("TextButton")
+minimizeButton.Size = UDim2.new(0.08, 0, 0.8, 0)
+minimizeButton.Position = UDim2.new(0.8, -10, 0.1, 0)
+minimizeButton.BackgroundTransparency = 1
+minimizeButton.Text = "-"
+minimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+minimizeButton.Font = Enum.Font.GothamBold
+minimizeButton.TextScaled = true
+minimizeButton.Parent = topBar
 
-local scrollingCorner = Instance.new("UICorner", scrollingFrame)
-scrollingCorner.CornerRadius = UDim.new(0, 8)
+minimizeButton.MouseButton1Click:Connect(function()
+    main.Visible = false
+    minimizedFrame.Visible = true
+end)
 
-local UIListLayout = Instance.new("UIListLayout", scrollingFrame)
-UIListLayout.FillDirection = Enum.FillDirection.Horizontal
-UIListLayout.Padding = UDim.new(0, 5)
+-- Side ScrollingFrame
+local sideScrollingFrame = Instance.new("ScrollingFrame")
+sideScrollingFrame.Size = UDim2.new(0.3, 0, 0.9, 0)
+sideScrollingFrame.Position = UDim2.new(0, 0, 0.1, 0)
+sideScrollingFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+sideScrollingFrame.ScrollBarThickness = 6
+sideScrollingFrame.Parent = main
 
--- Add Tabs
-for i = 1, 4 do
-    local tabButton = Instance.new("TextButton")
-    tabButton.Name = "TabButton" .. i
-    tabButton.Size = UDim2.new(0.2, 0, 1, 0)
-    tabButton.Text = "Tab " .. i
-    tabButton.Font = Enum.Font.Gotham
-    tabButton.TextSize = 14
-    tabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    tabButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-    tabButton.Parent = scrollingFrame
+local sideStroke = Instance.new("UIStroke")
+sideStroke.Thickness = 0.2
+sideStroke.Color = Color3.fromRGB(255, 0, 0)
+sideStroke.Parent = sideScrollingFrame
+
+-- Content ScrollingFrame
+local contentScrollingFrame = Instance.new("ScrollingFrame")
+contentScrollingFrame.Size = UDim2.new(0.7, 0, 0.9, 0)
+contentScrollingFrame.Position = UDim2.new(0.3, 0, 0.1, 0)
+contentScrollingFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+contentScrollingFrame.ScrollBarThickness = 6
+contentScrollingFrame.Parent = main
+
+local contentStroke = Instance.new("UIStroke")
+contentStroke.Thickness = 0.2
+contentStroke.Color = Color3.fromRGB(255, 0, 0)
+contentStroke.Parent = contentScrollingFrame
+
+-- Minimized Frame
+local minimizedFrame = Instance.new("Frame")
+minimizedFrame.Size = UDim2.new(0.06, 0, 0.145, 0)
+minimizedFrame.Position = UDim2.new(0.02, 0, 0.02, 0)
+minimizedFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+minimizedFrame.BorderSizePixel = 0
+minimizedFrame.Visible = false
+minimizedFrame.Active = true
+minimizedFrame.Parent = gui
+
+local minimizedCorner = Instance.new("UICorner")
+minimizedCorner.CornerRadius = UDim.new(0.2, 0)
+minimizedCorner.Parent = minimizedFrame
+
+local expandButton = Instance.new("TextButton")
+expandButton.Size = UDim2.new(1, 0, 1, 0)
+expandButton.BackgroundTransparency = 0
+expandButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+expandButton.Font = Enum.Font.GothamBold
+expandButton.TextScaled = true
+expandButton.Text = "Unstable"
+expandButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+expandButton.Parent = minimizedFrame
+
+expandButton.MouseButton1Click:Connect(function()
+    minimizedFrame.Visible = false
+    main.Visible = true
+    main.Position = main.Position -- Retains its position
+end)
+
+-- Notification System
+local function notify(message, duration)
+    local notification = Instance.new("TextLabel")
+    notification.Size = UDim2.new(0.3, 0, 0.1, 0)
+    notification.Position = UDim2.new(0.35, 0, 0.8, 0)
+    notification.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    notification.BorderColor3 = Color3.fromRGB(255, 0, 0)
+    notification.Text = message
+    notification.TextColor3 = Color3.fromRGB(255, 255, 255)
+    notification.Font = Enum.Font.Gotham
+    notification.TextScaled = true
+    notification.Parent = gui
+
+    local uiCorner = Instance.new("UICorner")
+    uiCorner.CornerRadius = UDim.new(0.05, 0)
+    uiCorner.Parent = notification
+
+    wait(duration or 3)
+    notification:Destroy()
 end
 
--- Notification Function
-function Notify(title, message, delay)
-    local notificationFrame = Instance.new("Frame")
-    notificationFrame.Name = "NotificationFrame"
-    notificationFrame.Parent = gui
-    notificationFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-    notificationFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-    notificationFrame.Size = UDim2.new(0, 300, 0, 100)
-    notificationFrame.Position = UDim2.new(0.5, 0, 0.8, 0)
-
-    local notificationCorner = Instance.new("UICorner", notificationFrame)
-    notificationCorner.CornerRadius = UDim.new(0, 8)
-
-    local titleLabel = Instance.new("TextLabel")
-    titleLabel.Name = "TitleLabel"
-    titleLabel.Parent = notificationFrame
-    titleLabel.Font = Enum.Font.GothamBold
-    titleLabel.Text = title
-    titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    titleLabel.TextSize = 18
-    titleLabel.Position = UDim2.new(0, 10, 0, 10)
-    titleLabel.Size = UDim2.new(1, -20, 0, 25)
-    titleLabel.BackgroundTransparency = 1
-
-    local messageLabel = Instance.new("TextLabel")
-    messageLabel.Name = "MessageLabel"
-    messageLabel.Parent = notificationFrame
-    messageLabel.Font = Enum.Font.Gotham
-    messageLabel.Text = message
-    messageLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-    messageLabel.TextSize = 14
-    messageLabel.Position = UDim2.new(0, 10, 0, 40)
-    messageLabel.Size = UDim2.new(1, -20, 0, 50)
-    messageLabel.TextWrapped = true
-    messageLabel.BackgroundTransparency = 1
-
-    local tween = TweenService:Create(
-        notificationFrame,
-        TweenInfo.new(delay, Enum.EasingStyle.Linear),
-        {BackgroundTransparency = 1, Position = UDim2.new(0.5, 0, 0.6, 0)}
-    )
-    wait(delay)
-    tween:Play()
-    tween.Completed:Wait()
-    notificationFrame:Destroy()
-end
-
--- Example Notification
-Notify("Welcome!", "hello.", 3)
+notify("Hello! Notification active.", 3)
