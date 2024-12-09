@@ -61,9 +61,9 @@ end)
 
 -- Minimized Frame
 local minimizedFrame = Instance.new("Frame")
-minimizedFrame.Size = UDim2.new(0.12, 0, 0.12, 0)
+minimizedFrame.Size = UDim2.new(0.060, 0, 0.145, 0) -- A perfect square
 minimizedFrame.Position = UDim2.new(0.02, 0, 0.02, 0)
-minimizedFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+minimizedFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 minimizedFrame.BorderSizePixel = 0
 minimizedFrame.Visible = false
 minimizedFrame.Active = true
@@ -73,14 +73,20 @@ local minimizedCorner = Instance.new("UICorner")
 minimizedCorner.CornerRadius = UDim.new(0.2, 0)
 minimizedCorner.Parent = minimizedFrame
 
--- Expand Button
-local expandButton = Instance.new("ImageButton")
+-- Expand Button (TextButton)
+local expandButton = Instance.new("TextButton")
 expandButton.Size = UDim2.new(1, 0, 1, 0)
-expandButton.BackgroundTransparency = 1
-expandButton.Image = "rbxassetid://6031068437" -- Update with a proper image ID
+expandButton.BackgroundTransparency = 0
+expandButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+expandButton.Font = Enum.Font.GothamBold
+expandButton.Text = "Un" .. "<font color=\"rgb(0, 0, 255)\">Un</font><font color=\"rgb(75, 0, 130)\">sta</font><font color=\"rgb(255, 0, 0)\">ble</font>"
+expandButton.RichText = true
+expandButton.TextScaled = true
+expandButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+expandButton.TextStrokeTransparency = 0.7
 expandButton.Parent = minimizedFrame
 
--- Dragging Logic
+-- Dragging Logic for Minimized Frame
 local isDragging = false
 local dragInput, dragStart, startPos
 
