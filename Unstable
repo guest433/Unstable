@@ -1,4 +1,4 @@
-print("Work in process")
+print("Work in progress")
 local gui = Instance.new("ScreenGui")
 gui.Name = "ExploitStyleGUI"
 gui.ResetOnSpawn = false
@@ -8,22 +8,28 @@ local UserInputService = game:GetService("UserInputService")
 local deviceType = UserInputService.TouchEnabled and "Mobile" or "PC"
 
 -- Determine GUI scale and position based on device type
-local frameSize = deviceType == "Mobile" and UDim2.new(0.7, 0, 0.9, 0) or UDim2.new(0.5, 0, 0.7, 0)
+local guiScale = deviceType == "Mobile" and 1.5 or 1
+local frameSize = deviceType == "Mobile" and UDim2.new(0.8, 0, 0.9, 0) or UDim2.new(0.6, 0, 0.7, 0)
 
 -- Main Frame (Draggable)
 local main = Instance.new("Frame")
 main.Size = frameSize
-main.Position = UDim2.new((1 - main.Size.X.Scale) / 2, 0, (1 - main.Size.Y.Scale) / 2, 0)
+main.Position = UDim2.new((1 - frameSize.X.Scale) / 2, 0, (1 - frameSize.Y.Scale) / 2, 0)
 main.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 main.BorderSizePixel = 0
 main.Active = true
 main.Draggable = true
+main.Visible = true
 main.Parent = gui
+
+-- UICorner for Main Frame
+local uiCorner = Instance.new("UICorner")
+uiCorner.CornerRadius = UDim.new(0.05, 0)
+uiCorner.Parent = main
 
 -- Top Bar
 local topBar = Instance.new("Frame")
 topBar.Size = UDim2.new(1, 0, 0.1, 0)
-topBar.Position = UDim2.new(0, 0, 0, 0)
 topBar.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 topBar.BorderSizePixel = 0
 topBar.Parent = main
@@ -44,7 +50,7 @@ destroyButton.Size = UDim2.new(0.1, 0, 1, 0)
 destroyButton.Position = UDim2.new(0.9, 0, 0, 0)
 destroyButton.BackgroundTransparency = 1
 destroyButton.Text = "X"
-destroyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+destroyButton.TextColor3 = Color3.fromRGB(255, 0, 0)
 destroyButton.Font = Enum.Font.GothamBold
 destroyButton.TextScaled = true
 destroyButton.Parent = topBar
@@ -55,60 +61,68 @@ end)
 
 -- Minimized Frame
 local minimizedFrame = Instance.new("Frame")
-minimizedFrame.Size = UDim2.new(0.1, 0, 0.2, 0)
+minimizedFrame.Size = UDim2.new(0.12, 0, 0.12, 0)
 minimizedFrame.Position = UDim2.new(0.02, 0, 0.02, 0)
-minimizedFrame.BackgroundTransparency = 1
+minimizedFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 minimizedFrame.BorderSizePixel = 0
 minimizedFrame.Visible = false
 minimizedFrame.Active = true
-minimizedFrame.Draggable = true
 minimizedFrame.Parent = gui
 
-local uiCorner = Instance.new("UICorner")
-uiCorner.CornerRadius = UDim.new(0.1, 0)
-uiCorner.Parent = minimizedFrame
+local minimizedCorner = Instance.new("UICorner")
+minimizedCorner.CornerRadius = UDim.new(0.2, 0)
+minimizedCorner.Parent = minimizedFrame
 
 -- Expand Button
 local expandButton = Instance.new("ImageButton")
 expandButton.Size = UDim2.new(1, 0, 1, 0)
-expandButton.Position = UDim2.new(0, 0, 0, 0)
 expandButton.BackgroundTransparency = 1
-expandButton.Image = "rbxassetid://114916632097360" -- Corrected image ID format
-expandButton.Active = true
+expandButton.Image = "rbxassetid://6031068437" -- Update with a proper image ID
 expandButton.Parent = minimizedFrame
 
--- Check if the image loads properly
-expandButton:GetPropertyChangedSignal("Image"):Connect(function()
-    if expandButton.Image == "" or not expandButton:IsDescendantOf(game) then
-        warn("Image failed to load. Check if the asset ID is correct.")
-    end
-end)
-
--- Handle dragging and opening for the expand button
+-- Dragging Logic
 local isDragging = false
-expandButton.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement then
+local dragInput, dragStart, startPos
+
+local function onInputBegan(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         isDragging = true
+        dragStart = input.Position
+        startPos = minimizedFrame.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                isDragging = false
+            end
+        end)
     end
-end)
+end
 
-expandButton.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement then
-        isDragging = false
+local function onInputChanged(input)
+    if isDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        local delta = input.Position - dragStart
+        minimizedFrame.Position = UDim2.new(
+            startPos.X.Scale,
+            startPos.X.Offset + delta.X,
+            startPos.Y.Scale,
+            startPos.Y.Offset + delta.Y
+        )
     end
-end)
+end
 
+expandButton.InputBegan:Connect(onInputBegan)
+expandButton.InputChanged:Connect(onInputChanged)
 expandButton.MouseButton1Click:Connect(function()
     if isDragging then return end
     minimizedFrame.Visible = false
     main.Visible = true
-    main.Position = minimizedFrame.Position -- Pops up where it was minimized
+    main.Position = minimizedFrame.Position -- Restore position
     main:TweenSizeAndPosition(
         frameSize,
         minimizedFrame.Position,
         Enum.EasingDirection.Out,
         Enum.EasingStyle.Linear,
-        0.3)
+        0.3
+    )
 end)
 
 -- Minimize Button
@@ -133,6 +147,27 @@ minimizeButton.MouseButton1Click:Connect(function()
         function()
             main.Visible = false
             minimizedFrame.Visible = true
-            minimizedFrame.Position = main.Position -- Updates position
-        end)
+        end
+    )
 end)
+
+-- Side Scrolling Frame
+local sideScrollingFrame = Instance.new("ScrollingFrame")
+sideScrollingFrame.Size = UDim2.new(0.3, 0, 0.9, 0)
+sideScrollingFrame.Position = UDim2.new(0, 0, 0.1, 0)
+sideScrollingFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+sideScrollingFrame.BorderSizePixel = 0
+sideScrollingFrame.CanvasSize = UDim2.new(0, 0, 2, 0)
+sideScrollingFrame.ScrollBarThickness = 5
+sideScrollingFrame.Parent = main
+
+-- Content Scrolling Frame
+local contentScrollingFrame = Instance.new("ScrollingFrame")
+contentScrollingFrame.Size = UDim2.new(0.7, 0, 0.9, 0)
+contentScrollingFrame.Position = UDim2.new(0.3, 0, 0.1, 0)
+contentScrollingFrame.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+contentScrollingFrame.BorderSizePixel = 0
+contentScrollingFrame.CanvasSize = UDim2.new(0, 0, 3, 0)
+contentScrollingFrame.ScrollBarThickness = 5
+contentScrollingFrame.ScrollingEnabled = true
+contentScrollingFrame.Parent = main
