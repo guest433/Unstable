@@ -1,5 +1,4 @@
 print("Work in process")
-
 local gui = Instance.new("ScreenGui")
 gui.Name = "ExploitStyleGUI"
 gui.ResetOnSpawn = false
@@ -36,7 +35,7 @@ titleLabel.Size = UDim2.new(0.8, 0, 1, 0)
 titleLabel.BackgroundTransparency = 1
 titleLabel.Text = "Unstable"
 titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-titleLabel.Font = Enum.Font.GothamBold
+titleLabel.Font = Enum.Font.Gotham
 titleLabel.TextScaled = true
 titleLabel.Parent = topBar
 
@@ -44,7 +43,7 @@ titleLabel.Parent = topBar
 local destroyButton = Instance.new("TextButton")
 destroyButton.Size = UDim2.new(0.1, 0, 1, 0)
 destroyButton.Position = UDim2.new(0.9, 0, 0, 0)
-destroyButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+destroyButton.BackgroundTransparency = 1
 destroyButton.Text = "X"
 destroyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 destroyButton.Font = Enum.Font.GothamBold
@@ -52,24 +51,14 @@ destroyButton.TextScaled = true
 destroyButton.Parent = topBar
 
 destroyButton.MouseButton1Click:Connect(function()
-    main:TweenSizeAndPosition(
-        UDim2.new(0, 0, 0, 0),
-        UDim2.new(0.5, 0, 0.5, 0),
-        Enum.EasingDirection.Out,
-        Enum.EasingStyle.Linear,
-        0.3,
-        true,
-        function()
-            gui:Destroy()
-        end
-    )
+    gui:Destroy()
 end)
 
 -- Minimized Frame
 local minimizedFrame = Instance.new("Frame")
-minimizedFrame.Size = UDim2.new(0.1, 0, 0.2, 0) -- Small enough for mobile
+minimizedFrame.Size = UDim2.new(0.1, 0, 0.2, 0)
 minimizedFrame.Position = UDim2.new(0.02, 0, 0.02, 0)
-minimizedFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+minimizedFrame.BackgroundTransparency = 1
 minimizedFrame.BorderSizePixel = 0
 minimizedFrame.Visible = false
 minimizedFrame.Active = true
@@ -85,7 +74,7 @@ local expandButton = Instance.new("ImageButton")
 expandButton.Size = UDim2.new(1, 0, 1, 0)
 expandButton.Position = UDim2.new(0, 0, 0, 0)
 expandButton.BackgroundTransparency = 1
-expandButton.Image = "rbxassetid://114916632097360"
+expandButton.Image = "rbxassetid://114916632097360" -- Verify the asset ID
 expandButton.Active = true
 expandButton.Parent = minimizedFrame
 
@@ -103,14 +92,13 @@ expandButton.InputEnded:Connect(function(input)
 end)
 
 expandButton.MouseButton1Click:Connect(function()
-    if isDragging then return end -- Prevent opening while dragging
+    if isDragging then return end
     minimizedFrame.Visible = false
     main.Visible = true
-    main.Size = UDim2.new(0, 0, 0, 0)
-    main.Position = UDim2.new(0.5, 0, 0.5, 0)
+    main.Position = minimizedFrame.Position -- Pop up where it was minimized
     main:TweenSizeAndPosition(
         frameSize,
-        UDim2.new((1 - frameSize.X.Scale) / 2, 0, (1 - frameSize.Y.Scale) / 2, 0),
+        minimizedFrame.Position,
         Enum.EasingDirection.Out,
         Enum.EasingStyle.Linear,
         0.3
@@ -121,8 +109,8 @@ end)
 local minimizeButton = Instance.new("TextButton")
 minimizeButton.Size = UDim2.new(0.1, 0, 1, 0)
 minimizeButton.Position = UDim2.new(0.8, 0, 0, 0)
-minimizeButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
-minimizeButton.Text = "_"
+minimizeButton.BackgroundTransparency = 1
+minimizeButton.Text = "-"
 minimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 minimizeButton.Font = Enum.Font.GothamBold
 minimizeButton.TextScaled = true
@@ -139,14 +127,15 @@ minimizeButton.MouseButton1Click:Connect(function()
         function()
             main.Visible = false
             minimizedFrame.Visible = true
+            minimizedFrame.Position = main.Position -- Update minimized frame position
         end
     )
 end)
 
 -- Side Scrolling Frame
 local sideScrollingFrame = Instance.new("ScrollingFrame")
-sideScrollingFrame.Size = UDim2.new(0.3, 0, 0.9, 0) -- 30% width
-sideScrollingFrame.Position = UDim2.new(0, 0, 0.1, 0) -- Below top bar
+sideScrollingFrame.Size = UDim2.new(0.3, 0, 0.9, 0)
+sideScrollingFrame.Position = UDim2.new(0, 0, 0.1, 0)
 sideScrollingFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 sideScrollingFrame.BorderSizePixel = 0
 sideScrollingFrame.CanvasSize = UDim2.new(0, 0, 2, 0)
@@ -155,8 +144,8 @@ sideScrollingFrame.Parent = main
 
 -- Content Scrolling Frame
 local contentScrollingFrame = Instance.new("ScrollingFrame")
-contentScrollingFrame.Size = UDim2.new(0.7, 0, 0.9, 0) -- 70% width
-contentScrollingFrame.Position = UDim2.new(0.3, 0, 0.1, 0) -- Next to side frame
+contentScrollingFrame.Size = UDim2.new(0.7, 0, 0.9, 0)
+contentScrollingFrame.Position = UDim2.new(0.3, 0, 0.1, 0)
 contentScrollingFrame.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 contentScrollingFrame.BorderSizePixel = 0
 contentScrollingFrame.CanvasSize = UDim2.new(0, 0, 3, 0)
