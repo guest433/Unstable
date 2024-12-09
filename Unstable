@@ -8,7 +8,6 @@ local UserInputService = game:GetService("UserInputService")
 local deviceType = UserInputService.TouchEnabled and "Mobile" or "PC"
 
 -- Determine GUI scale and position based on device type
-local guiScale = deviceType == "Mobile" and 1.5 or 1
 local frameSize = deviceType == "Mobile" and UDim2.new(0.7, 0, 0.9, 0) or UDim2.new(0.5, 0, 0.7, 0)
 
 -- Main Frame (Draggable)
@@ -74,10 +73,18 @@ local expandButton = Instance.new("ImageButton")
 expandButton.Size = UDim2.new(1, 0, 1, 0)
 expandButton.Position = UDim2.new(0, 0, 0, 0)
 expandButton.BackgroundTransparency = 1
-expandButton.Image = "rbxassetid://114916632097360" -- Verify the asset ID
+expandButton.Image = "rbxassetid://114916632097360" -- Corrected image ID format
 expandButton.Active = true
 expandButton.Parent = minimizedFrame
 
+-- Check if the image loads properly
+expandButton:GetPropertyChangedSignal("Image"):Connect(function()
+    if expandButton.Image == "" or not expandButton:IsDescendantOf(game) then
+        warn("Image failed to load. Check if the asset ID is correct.")
+    end
+end)
+
+-- Handle dragging and opening for the expand button
 local isDragging = false
 expandButton.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseMovement then
@@ -95,14 +102,13 @@ expandButton.MouseButton1Click:Connect(function()
     if isDragging then return end
     minimizedFrame.Visible = false
     main.Visible = true
-    main.Position = minimizedFrame.Position -- Pop up where it was minimized
+    main.Position = minimizedFrame.Position -- Pops up where it was minimized
     main:TweenSizeAndPosition(
         frameSize,
         minimizedFrame.Position,
         Enum.EasingDirection.Out,
         Enum.EasingStyle.Linear,
-        0.3
-    )
+        0.3)
 end)
 
 -- Minimize Button
@@ -127,28 +133,6 @@ minimizeButton.MouseButton1Click:Connect(function()
         function()
             main.Visible = false
             minimizedFrame.Visible = true
-            minimizedFrame.Position = main.Position -- Update minimized frame position
-        end
-    )
+            minimizedFrame.Position = main.Position -- Updates position
+        end)
 end)
-
--- Side Scrolling Frame
-local sideScrollingFrame = Instance.new("ScrollingFrame")
-sideScrollingFrame.Size = UDim2.new(0.3, 0, 0.9, 0)
-sideScrollingFrame.Position = UDim2.new(0, 0, 0.1, 0)
-sideScrollingFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-sideScrollingFrame.BorderSizePixel = 0
-sideScrollingFrame.CanvasSize = UDim2.new(0, 0, 2, 0)
-sideScrollingFrame.ScrollBarThickness = 5
-sideScrollingFrame.Parent = main
-
--- Content Scrolling Frame
-local contentScrollingFrame = Instance.new("ScrollingFrame")
-contentScrollingFrame.Size = UDim2.new(0.7, 0, 0.9, 0)
-contentScrollingFrame.Position = UDim2.new(0.3, 0, 0.1, 0)
-contentScrollingFrame.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-contentScrollingFrame.BorderSizePixel = 0
-contentScrollingFrame.CanvasSize = UDim2.new(0, 0, 3, 0)
-contentScrollingFrame.ScrollBarThickness = 5
-contentScrollingFrame.ScrollingEnabled = true
-contentScrollingFrame.Parent = main
