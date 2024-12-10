@@ -1,0 +1,124 @@
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local playerGui = Players.LocalPlayer:WaitForChild("PlayerGui")
+local notifications = {} -- Holds active notifications
+
+local function notify(title, message, buttons)
+    local screenGui = playerGui:FindFirstChild("NotificationGui")
+    if not screenGui then
+        screenGui = Instance.new("ScreenGui")
+        screenGui.Name = "NotificationGui"
+        screenGui.Parent = playerGui
+    end
+
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(0, 240, 0, 108)
+    frame.Position = UDim2.new(1, -250, 1, -120)
+    frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    frame.BorderColor3 = Color3.fromRGB(255, 0, 0)
+    frame.BorderSizePixel = 2
+    frame.Parent = screenGui
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 12)
+    corner.Parent = frame
+
+    local titleLabel = Instance.new("TextLabel")
+    titleLabel.Text = title
+    titleLabel.Font = Enum.Font.SourceSansBold
+    titleLabel.TextSize = 18
+    titleLabel.TextColor3 = Color3.new(1, 1, 1)
+    titleLabel.Size = UDim2.new(1, 0, 0, 24)
+    titleLabel.BackgroundTransparency = 1
+    titleLabel.Parent = frame
+
+    local messageLabel = Instance.new("TextLabel")
+    messageLabel.Text = message
+    messageLabel.Font = Enum.Font.SourceSans
+    messageLabel.TextSize = 16
+    messageLabel.TextColor3 = Color3.new(1, 1, 1)
+    messageLabel.Size = UDim2.new(1, -20, 0, 60)
+    messageLabel.Position = UDim2.new(0, 10, 0, 30)
+    messageLabel.BackgroundTransparency = 1
+    messageLabel.TextWrapped = true
+    messageLabel.TextYAlignment = Enum.TextYAlignment.Top
+    messageLabel.Parent = frame
+
+    table.insert(notifications, frame)
+
+    local function updateStack()
+        for i, notif in ipairs(notifications) do
+            notif:TweenPosition(
+                UDim2.new(1, -250, 1, -120 - (i - 1) * 118),
+                Enum.EasingDirection.Out,
+                Enum.EasingStyle.Quad,
+                0.3,
+                true
+            )
+        end
+    end
+
+    updateStack()
+
+    if buttons then
+        for i, buttonData in ipairs(buttons) do
+            local button = Instance.new("TextButton")
+            button.Text = buttonData.text
+            button.Font = Enum.Font.SourceSans
+            button.TextSize = 16
+            button.TextColor3 = Color3.new(1, 1, 1)
+            button.Size = UDim2.new(0.4, 0, 0, 30)
+            button.Position = UDim2.new(0.1 + (i - 1) * 0.5, 0, 1, -35)
+            button.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+            button.BorderSizePixel = 0
+            button.Parent = frame
+
+            local buttonCorner = Instance.new("UICorner")
+            buttonCorner.CornerRadius = UDim.new(0, 8)
+            buttonCorner.Parent = button
+
+            button.MouseButton1Click:Connect(function()
+                buttonData.onClick()
+                frame:Destroy()
+                table.remove(notifications, table.find(notifications, frame))
+                updateStack()
+            end)
+        end
+    else
+        task.delay(5, function()
+            if frame.Parent then
+                frame:Destroy()
+                table.remove(notifications, table.find(notifications, frame))
+                updateStack()
+            end
+        end)
+    end
+end
+
+notify("Welcome!", "This is an executor-friendly notification system.", nil)
+--examples
+
+-- Notification Example 1: Simple auto-dismiss notification
+notify(
+    "Welcome!",
+    "This is a simple notification that will disappear after 5 seconds.",
+    nil -- No buttons, will auto-dismiss
+)
+
+-- Notification Example 2: Notification with buttons
+notify(
+    "Action Required",
+    "Would you like to save your progress?",
+    {
+        { text = "Yes", onClick = function() print("Progress saved!") end },
+        { text = "No", onClick = function() print("Progress not saved.") end }
+    }
+)
+
+-- Notification Example 3: Another auto-dismiss notification
+task.wait(1) -- Adding a delay to stack notifications properly
+notify(
+    "Reminder",
+    "Don't forget to check your inventory!",
+    nil
+)
