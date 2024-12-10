@@ -1,14 +1,21 @@
-print("Work in progress")
+
 local gui = Instance.new("ScreenGui")
-gui.Name = "ExploitStyleGUI"
+gui.Name = "tx hub x unstable x f h"
 gui.ResetOnSpawn = false
 gui.Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
+
+
+
+
+
+
+gui.ResetOnSpawn = false
 
 local UserInputService = game:GetService("UserInputService")
 local deviceType = UserInputService.TouchEnabled and "Mobile" or "PC"
 
 -- Determine GUI scale and position based on device type
-local frameSize = deviceType == "Mobile" and UDim2.new(0.8, 0, 0.9, 0) or UDim2.new(0.6, 0, 0.7, 0)
+local frameSize = deviceType == "Mobile" and UDim2.new(0.8, 0, 1, 0) or UDim2.new(0.6, 0, 0.7, 0)
 
 -- Main Frame (Draggable)
 local main = Instance.new("Frame")
@@ -23,21 +30,25 @@ main.Parent = gui
 
 -- UICorner for Main Frame
 local uiCorner = Instance.new("UICorner")
-uiCorner.CornerRadius = UDim.new(0.05, 0)
+uiCorner.CornerRadius = UDim.new(0.01, 0)
 uiCorner.Parent = main
 
 -- Top Bar
 local topBar = Instance.new("Frame")
 topBar.Size = UDim2.new(1, 0, 0.1, 0)
-topBar.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+topBar.BackgroundColor3 = Color3.fromRGB(23, 23, 32)
 topBar.BorderSizePixel = 0
 topBar.Parent = main
+
+local uiiicorner = Instance.new("UICorner")
+uiiicorner.CornerRadius = UDim.new(0, 0.05)
+uiiicorner.Parent = topBar
 
 -- Title Label
 local titleLabel = Instance.new("TextLabel")
 titleLabel.Size = UDim2.new(0.8, 0, 1, 0)
 titleLabel.BackgroundTransparency = 1
-titleLabel.Text = "Unstable"
+titleLabel.Text = 'Unstable'
 titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 titleLabel.Font = Enum.Font.Gotham
 titleLabel.TextScaled = true
@@ -48,14 +59,25 @@ local destroyButton = Instance.new("TextButton")
 destroyButton.Size = UDim2.new(0.1, 0, 1, 0)
 destroyButton.Position = UDim2.new(0.9, 0, 0, 0)
 destroyButton.BackgroundTransparency = 1
-destroyButton.Text = "X"
-destroyButton.TextColor3 = Color3.fromRGB(255, 0, 0)
+destroyButton.Text = "x"
+destroyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 destroyButton.Font = Enum.Font.GothamBold
 destroyButton.TextScaled = true
 destroyButton.Parent = topBar
 
+
+
 destroyButton.MouseButton1Click:Connect(function()
-    gui:Destroy()
+    main:TweenSize(
+        UDim2.new(0, 0, 0, 0), -- Shrink to size (0, 0)
+        Enum.EasingDirection.Out,
+        Enum.EasingStyle.Linear,
+        0.3,
+        true,
+        function()
+            gui:Destroy() -- Destroy after shrinking animation
+        end
+    )
 end)
 
 -- Minimized Frame
@@ -119,15 +141,14 @@ expandButton.MouseButton1Click:Connect(function()
     if isDragging then return end
     minimizedFrame.Visible = false
     main.Visible = true
-    main.Position = main.Position -- Restore position from before minimization
-    main:TweenSizeAndPosition(
+    main:TweenSize(
         frameSize,
-        main.Position,
         Enum.EasingDirection.Out,
         Enum.EasingStyle.Linear,
         0.3
     )
 end)
+
 
 -- Minimize Button
 local minimizeButton = Instance.new("TextButton")
@@ -141,9 +162,8 @@ minimizeButton.TextScaled = true
 minimizeButton.Parent = topBar
 
 minimizeButton.MouseButton1Click:Connect(function()
-    main:TweenSizeAndPosition(
-        UDim2.new(0, 0, 0, 0),
-        main.Position,
+    main:TweenSize(
+        UDim2.new(0.1, 0, 0.1, 0), -- Shrink to a small size
         Enum.EasingDirection.Out,
         Enum.EasingStyle.Linear,
         0.3,
@@ -154,3 +174,23 @@ minimizeButton.MouseButton1Click:Connect(function()
         end
     )
 end)
+
+-- Side ScrollingFrame
+local sideScrollingFrame = Instance.new("ScrollingFrame")
+sideScrollingFrame.Size = UDim2.new(0.30, 0, 0.9, 0)
+sideScrollingFrame.Position = UDim2.new(0, 0, 0.1, 0)
+sideScrollingFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 29)
+sideScrollingFrame.BorderSizePixel = 0
+sideScrollingFrame.ScrollBarThickness = 2
+sideScrollingFrame.CanvasSize = UDim2.new(0, 0, 5, 0)
+sideScrollingFrame.Parent = main
+
+-- Content ScrollingFrame
+local contentScrollingFrame = Instance.new("ScrollingFrame")
+contentScrollingFrame.Size = UDim2.new(0.70, 0, 0.9, 0)
+contentScrollingFrame.Position = UDim2.new(0.30, 0, 0.1, 0)
+contentScrollingFrame.BackgroundColor3 = Color3.fromRGB(23, 21, 17)
+contentScrollingFrame.BorderSizePixel = 0
+contentScrollingFrame.ScrollBarThickness = 2
+contentScrollingFrame.CanvasSize = UDim2.new(0, 0, 5, 0)
+contentScrollingFrame.Parent = main
