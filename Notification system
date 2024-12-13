@@ -1,19 +1,31 @@
 local Players = game:GetService("Players")
-local TweenService = game:GetService("TweenService")
-local playerGui = Players.LocalPlayer:WaitForChild("PlayerGui")
-local notifications = {} -- Holds active notifications
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+local notifications = {}
 
-local function notify(title, message, buttons)
+local function isMobile()
+    return workspace.CurrentCamera.ViewportSize.X <= 600
+end
+
+local function notify(data)
+    local title = data.Title or "Notification"
+    local message = data.Message or "No message provided."
+    local duration = data.Duration == nil or data.Duration == "nil" and 5 or tonumber(data.Duration)
+    local icon = data.Icon
+    local buttons = data.Buttons or {}
+
     local screenGui = playerGui:FindFirstChild("NotificationGui")
     if not screenGui then
         screenGui = Instance.new("ScreenGui")
         screenGui.Name = "NotificationGui"
+        screenGui.ResetOnSpawn = false
         screenGui.Parent = playerGui
     end
 
     local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(0, 240, 0, 108)
-    frame.Position = UDim2.new(1, -250, 1, -120)
+    frame.Size = UDim2.new(0.4, 0, 0, #buttons > 0 and 120 or 80)
+    frame.Position = UDim2.new(1, -10, 1, -10)
+    frame.AnchorPoint = Vector2.new(1, 1)
     frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     frame.BorderColor3 = Color3.fromRGB(255, 0, 0)
     frame.BorderSizePixel = 2
@@ -28,97 +40,100 @@ local function notify(title, message, buttons)
     titleLabel.Font = Enum.Font.SourceSansBold
     titleLabel.TextSize = 18
     titleLabel.TextColor3 = Color3.new(1, 1, 1)
-    titleLabel.Size = UDim2.new(1, 0, 0, 24)
+    titleLabel.Size = UDim2.new(1, -10, 0, 20)
+    titleLabel.Position = UDim2.new(0, 5, 0, 5)
     titleLabel.BackgroundTransparency = 1
     titleLabel.Parent = frame
 
-    local messageLabel = Instance.new("TextLabel")
-    messageLabel.Text = message
-    messageLabel.Font = Enum.Font.SourceSans
-    messageLabel.TextSize = 16
-    messageLabel.TextColor3 = Color3.new(1, 1, 1)
-    messageLabel.Size = UDim2.new(1, -20, 0, 60)
-    messageLabel.Position = UDim2.new(0, 10, 0, 30)
-    messageLabel.BackgroundTransparency = 1
-    messageLabel.TextWrapped = true
-    messageLabel.TextYAlignment = Enum.TextYAlignment.Top
-    messageLabel.Parent = frame
+    if icon and icon ~= "" then
+        local image = Instance.new("ImageLabel")
+        image.Size = UDim2.new(0, 40, 0, 40)
+        image.Position = UDim2.new(0, 5, 0, 30)
+        image.BackgroundTransparency = 1
+        image.Image = icon
+        image.Parent = frame
+
+        local messageLabel = Instance.new("TextLabel")
+        messageLabel.Text = message
+        messageLabel.Font = Enum.Font.SourceSans
+        messageLabel.TextSize = 14
+        messageLabel.TextColor3 = Color3.new(1, 1, 1)
+        messageLabel.Size = UDim2.new(1, -55, 0, 40)
+        messageLabel.Position = UDim2.new(0, 50, 0, 30)
+        messageLabel.BackgroundTransparency = 1
+        messageLabel.TextWrapped = true
+        messageLabel.Parent = frame
+    else
+        local messageLabel = Instance.new("TextLabel")
+        messageLabel.Text = message
+        messageLabel.Font = Enum.Font.SourceSans
+        messageLabel.TextSize = 14
+        messageLabel.TextColor3 = Color3.new(1, 1, 1)
+        messageLabel.Size = UDim2.new(1, -10, 0, 40)
+        messageLabel.Position = UDim2.new(0, 5, 0, 30)
+        messageLabel.BackgroundTransparency = 1
+        messageLabel.TextWrapped = true
+        messageLabel.Parent = frame
+    end
+
+    if #buttons > 0 then
+        for i, buttonData in ipairs(buttons) do
+            local buttonText = buttonData[1]
+            local buttonAction = buttonData[2]
+
+            if buttonText and buttonAction then
+                local button = Instance.new("TextButton")
+                button.Text = buttonText
+                button.Font = Enum.Font.SourceSans
+                button.TextSize = 14
+                button.TextColor3 = Color3.new(1, 1, 1)
+                button.Size = UDim2.new(0.45, 0, 0, 20)
+                button.Position = UDim2.new(0.05 + (i - 1) * 0.5, 0, 1, -25)
+                button.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+                button.BorderSizePixel = 0
+                button.Parent = frame
+
+                local buttonCorner = Instance.new("UICorner")
+                buttonCorner.CornerRadius = UDim.new(0, 8)
+                buttonCorner.Parent = button
+
+                button.MouseButton1Click:Connect(function()
+                    buttonAction()
+                    frame:Destroy()
+                    for i, notif in ipairs(notifications) do
+                        if notif == frame then
+                            table.remove(notifications, i)
+                            break
+                        end
+                    end
+                end)
+            end
+        end
+    end
 
     table.insert(notifications, frame)
 
-    local function updateStack()
-        for i, notif in ipairs(notifications) do
-            notif:TweenPosition(
-                UDim2.new(1, -250, 1, -120 - (i - 1) * 118),
-                Enum.EasingDirection.Out,
-                Enum.EasingStyle.Quad,
-                0.3,
-                true
-            )
-        end
-    end
-
-    updateStack()
-
-    if buttons then
-        for i, buttonData in ipairs(buttons) do
-            local button = Instance.new("TextButton")
-            button.Text = buttonData.text
-            button.Font = Enum.Font.SourceSans
-            button.TextSize = 16
-            button.TextColor3 = Color3.new(1, 1, 1)
-            button.Size = UDim2.new(0.4, 0, 0, 30)
-            button.Position = UDim2.new(0.1 + (i - 1) * 0.5, 0, 1, -35)
-            button.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-            button.BorderSizePixel = 0
-            button.Parent = frame
-
-            local buttonCorner = Instance.new("UICorner")
-            buttonCorner.CornerRadius = UDim.new(0, 8)
-            buttonCorner.Parent = button
-
-            button.MouseButton1Click:Connect(function()
-                buttonData.onClick()
-                frame:Destroy()
-                table.remove(notifications, table.find(notifications, frame))
-                updateStack()
-            end)
-        end
-    else
-        task.delay(5, function()
-            if frame.Parent then
-                frame:Destroy()
-                table.remove(notifications, table.find(notifications, frame))
-                updateStack()
+    task.delay(duration, function()
+        if frame.Parent then
+            frame:Destroy()
+            for i, notif in ipairs(notifications) do
+                if notif == frame then
+                    table.remove(notifications, i)
+                    break
+                end
             end
-        end)
-    end
+        end
+    end)
 end
 
-notify("Welcome!", "This is an executor-friendly notification system.", nil)
---examples
-
--- Notification Example 1: Simple auto-dismiss notification
-notify(
-    "Welcome!",
-    "This is a simple notification that will disappear after 5 seconds.",
-    nil -- No buttons, will auto-dismiss
-)
-
--- Notification Example 2: Notification with buttons
-notify(
-    "Action Required",
-    "Would you like to save your progress?",
-    {
-        { text = "Yes", onClick = function() print("Progress saved!") end },
-        { text = "No", onClick = function() print("Progress not saved.") end }
+-- Example usage
+notify{
+    Title = "Test Notification",
+    Message = "This is a notification with button actions.",
+    Duration = 5,
+    Icon = "rbxassetid://114916632097360",
+    Buttons = {
+        { "OK", function() print("OK Button Pressed") end },
+        { "Cancel", function() print("Cancel Button Pressed") end }
     }
-)
-
--- Notification Example 3: Another auto-dismiss notification
-task.wait(1) -- Adding a delay to stack notifications properly
-notify(
-    "Reminder",
-    "Don't forget to check your inventory!",
-    nil
-)
+}
