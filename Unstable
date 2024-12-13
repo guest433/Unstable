@@ -1,4 +1,4 @@
-
+-- unstable gui almost ready this is a decoy..incripting
 local gui = Instance.new("ScreenGui")
 gui.Name = "tx hub x unstable x f h"
 gui.ResetOnSpawn = false
