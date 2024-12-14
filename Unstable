@@ -1,196 +1,148 @@
--- unstable gui almost ready this is a decoy..incripting
-local gui = Instance.new("ScreenGui")
-gui.Name = "tx hub x unstable x f h"
-gui.ResetOnSpawn = false
-gui.Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
+-- own personal used 
+-- Unstable
+local Unstable = {}
 
+function Unstable.CreateLib(title, theme)
+    local gui = Instance.new("ScreenGui")
+    gui.Name = title
+    gui.ResetOnSpawn = false
+    gui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Size = UDim2.new(0.6, 0, 0.7, 0)
+    mainFrame.Position = UDim2.new(0.2, 0, 0.15, 0)
+    mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    mainFrame.Parent = gui
 
+    local tabs = {}
 
+    function tabs:NewTab(tabName)
+        local tabFrame = Instance.new("Frame")
+        tabFrame.Size = UDim2.new(1, 0, 1, 0)
+        tabFrame.BackgroundTransparency = 1
+        tabFrame.Visible = false
+        tabFrame.Parent = mainFrame
 
+        local sections = {}
 
-gui.ResetOnSpawn = false
+        function sections:NewSection(sectionName)
+            local sectionFrame = Instance.new("Frame")
+            sectionFrame.Size = UDim2.new(1, 0, 0, 100)
+            sectionFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+            sectionFrame.Parent = tabFrame
 
-local UserInputService = game:GetService("UserInputService")
-local deviceType = UserInputService.TouchEnabled and "Mobile" or "PC"
+            local content = {}
 
--- Determine GUI scale and position based on device type
-local frameSize = deviceType == "Mobile" and UDim2.new(0.8, 0, 1, 0) or UDim2.new(0.6, 0, 0.7, 0)
+            -- Create Button
+            function content:NewButton(buttonText, info, callback)
+                local button = Instance.new("TextButton")
+                button.Size = UDim2.new(0.8, 0, 0, 30)
+                button.Position = UDim2.new(0.1, 0, 0, 10)
+                button.Text = buttonText
+                button.Parent = sectionFrame
 
--- Main Frame (Draggable)
-local main = Instance.new("Frame")
-main.Size = frameSize
-main.Position = UDim2.new((1 - frameSize.X.Scale) / 2, 0, (1 - frameSize.Y.Scale) / 2, 0)
-main.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-main.BorderSizePixel = 0
-main.Active = true
-main.Draggable = true
-main.Visible = true
-main.Parent = gui
-
--- UICorner for Main Frame
-local uiCorner = Instance.new("UICorner")
-uiCorner.CornerRadius = UDim.new(0.01, 0)
-uiCorner.Parent = main
-
--- Top Bar
-local topBar = Instance.new("Frame")
-topBar.Size = UDim2.new(1, 0, 0.1, 0)
-topBar.BackgroundColor3 = Color3.fromRGB(23, 23, 32)
-topBar.BorderSizePixel = 0
-topBar.Parent = main
-
-local uiiicorner = Instance.new("UICorner")
-uiiicorner.CornerRadius = UDim.new(0, 0.05)
-uiiicorner.Parent = topBar
-
--- Title Label
-local titleLabel = Instance.new("TextLabel")
-titleLabel.Size = UDim2.new(0.8, 0, 1, 0)
-titleLabel.BackgroundTransparency = 1
-titleLabel.Text = 'Unstable'
-titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-titleLabel.Font = Enum.Font.Gotham
-titleLabel.TextScaled = true
-titleLabel.Parent = topBar
-
--- Destroy Button
-local destroyButton = Instance.new("TextButton")
-destroyButton.Size = UDim2.new(0.1, 0, 1, 0)
-destroyButton.Position = UDim2.new(0.9, 0, 0, 0)
-destroyButton.BackgroundTransparency = 1
-destroyButton.Text = "x"
-destroyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-destroyButton.Font = Enum.Font.GothamBold
-destroyButton.TextScaled = true
-destroyButton.Parent = topBar
-
-
-
-destroyButton.MouseButton1Click:Connect(function()
-    main:TweenSize(
-        UDim2.new(0, 0, 0, 0), -- Shrink to size (0, 0)
-        Enum.EasingDirection.Out,
-        Enum.EasingStyle.Linear,
-        0.3,
-        true,
-        function()
-            gui:Destroy() -- Destroy after shrinking animation
-        end
-    )
-end)
-
--- Minimized Frame
-local minimizedFrame = Instance.new("Frame")
-minimizedFrame.Size = UDim2.new(0.06, 0, 0.145, 0) -- A perfect square
-minimizedFrame.Position = UDim2.new(0.02, 0, 0.02, 0)
-minimizedFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-minimizedFrame.BorderSizePixel = 0
-minimizedFrame.Visible = false
-minimizedFrame.Active = true
-minimizedFrame.Parent = gui
-
-local minimizedCorner = Instance.new("UICorner")
-minimizedCorner.CornerRadius = UDim.new(0.2, 0)
-minimizedCorner.Parent = minimizedFrame
-
--- Expand Button (TextButton)
-local expandButton = Instance.new("TextButton")
-expandButton.Size = UDim2.new(1, 0, 1, 0)
-expandButton.BackgroundTransparency = 0
-expandButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-expandButton.Font = Enum.Font.GothamBold
-expandButton.RichText = true
-expandButton.TextScaled = true
-expandButton.Text = '<font color="rgb(0, 0, 255)">Un</font><font color="rgb(20, 20, 30)">sta</font><font color="rgb(255, 0, 0)">ble</font>'
-expandButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-expandButton.Parent = minimizedFrame
-
--- Dragging Logic for Minimized Frame
-local isDragging = false
-local dragInput, dragStart, startPos
-
-local function onInputBegan(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        isDragging = true
-        dragStart = input.Position
-        startPos = minimizedFrame.Position
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then
-                isDragging = false
+                button.MouseButton1Click:Connect(callback)
             end
-        end)
-    end
+
+            -- Create Slider
+            function content:NewSlider(sliderText, info, maxValue, minValue, callback)
+                local sliderFrame = Instance.new("Frame")
+                sliderFrame.Size = UDim2.new(0.8, 0, 0, 50)
+                sliderFrame.Position = UDim2.new(0.1, 0, 40, 0)
+                sliderFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+                sliderFrame.Parent = sectionFrame
+
+                local slider = Instance.new("TextLabel")
+                slider.Size = UDim2.new(1, 0, 0.5, 0)
+                slider.Position = UDim2.new(0, 0, 0, 0)
+                slider.Text = sliderText
+                slider.Parent = sliderFrame
+
+                local sliderBar = Instance.new("Frame")
+                sliderBar.Size = UDim2.new(1, 0, 0.5, 0)
+                sliderBar.Position = UDim2.new(0, 0, 0.5, 0)
+                sliderBar.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+                sliderBar.Parent = sliderFrame
+
+                local input = Instance.new("TextBox")
+                input.Size = UDim2.new(0.2, 0, 0.5, 0)
+                input.Position = UDim2.new(0.8, 0, 0, 0)
+                input.Text = tostring(minValue)
+                input.Parent = sliderFrame
+
+                input.FocusLost:Connect(function()
+                    local value = tonumber(input.Text)
+                    if value then
+                        callback(value)
+                    end
+                end)
+            end
+
+            -- Create Dropdown
+            function content:NewDropdown(dropdownText, info, options, callback)
+                local dropdownFrame = Instance.new("Frame")
+                dropdownFrame.Size = UDim2.new(0.8, 0, 0, 50)
+                dropdownFrame.Position = UDim2.new(0.1, 0, 100, 0)
+                dropdownFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+                dropdownFrame.Parent = sectionFrame
+
+                local dropdownLabel = Instance.new("TextLabel")
+                dropdownLabel.Size = UDim2.new(1, 0, 0.5, 0)
+                dropdownLabel.Text = dropdownText
+                dropdownLabel.Parent = dropdownFrame
+
+                local dropdownMenu = Instance.new("Frame")
+                dropdownMenu.Size = UDim2.new(1, 0, 1, 0)
+                dropdownMenu.Position = UDim2.new(0, 0, 0.5, 0)
+                dropdownMenu.Parent = dropdownFrame
+
+                for _, option in ipairs(options) do
+                    local optionButton = Instance.new("TextButton")
+                    optionButton.Size = UDim2.new(1, 0, 0.2, 0)
+                    optionButton.Text = option
+                    optionButton.Parent = dropdownMenu
+
+                    optionButton.MouseButton1Click:Connect(function()
+                        callback(option)
+                    end)
+                end
+            end
+
+-- Create Label
+function content:NewLabel(labelText)
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(0.8, 0, 0, 30)
+    label.Position = UDim2.new(0.1, 0, 0, 0)
+    label.BackgroundTransparency = 1
+    label.Text = labelText
+    label.TextColor3 = Color3.fromRGB(255, 255, 255)
+    label.Font = Enum.Font.Gotham
+    label.TextScaled = true
+    label.Parent = sectionFrame
 end
 
-local function onInputChanged(input)
-    if isDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-        local delta = input.Position - dragStart
-        minimizedFrame.Position = UDim2.new(
-            startPos.X.Scale,
-            startPos.X.Offset + delta.X,
-            startPos.Y.Scale,
-            startPos.Y.Offset + delta.Y
-        )
-    end
-end
+            -- Create TextBox
+            function content:NewTextBox(placeholderText, info, callback)
+                local textBox = Instance.new("TextBox")
+                textBox.Size = UDim2.new(0.8, 0, 0, 30)
+                textBox.Position = UDim2.new(0.1, 0, 150, 0)
+                textBox.PlaceholderText = placeholderText
+                textBox.Parent = sectionFrame
 
-expandButton.InputBegan:Connect(onInputBegan)
-expandButton.InputChanged:Connect(onInputChanged)
-expandButton.MouseButton1Click:Connect(function()
-    if isDragging then return end
-    minimizedFrame.Visible = false
-    main.Visible = true
-    main:TweenSize(
-        frameSize,
-        Enum.EasingDirection.Out,
-        Enum.EasingStyle.Linear,
-        0.3
-    )
-end)
+                textBox.FocusLost:Connect(function(enterPressed)
+                    if enterPressed then
+                        callback(textBox.Text)
+                    end
+                end)
+            end
 
-
--- Minimize Button
-local minimizeButton = Instance.new("TextButton")
-minimizeButton.Size = UDim2.new(0.1, 0, 1, 0)
-minimizeButton.Position = UDim2.new(0.8, 0, 0, 0)
-minimizeButton.BackgroundTransparency = 1
-minimizeButton.Text = "-"
-minimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-minimizeButton.Font = Enum.Font.GothamBold
-minimizeButton.TextScaled = true
-minimizeButton.Parent = topBar
-
-minimizeButton.MouseButton1Click:Connect(function()
-    main:TweenSize(
-        UDim2.new(0.1, 0, 0.1, 0), -- Shrink to a small size
-        Enum.EasingDirection.Out,
-        Enum.EasingStyle.Linear,
-        0.3,
-        true,
-        function()
-            main.Visible = false
-            minimizedFrame.Visible = true
+            return content
         end
-    )
-end)
 
--- Side ScrollingFrame
-local sideScrollingFrame = Instance.new("ScrollingFrame")
-sideScrollingFrame.Size = UDim2.new(0.30, 0, 0.9, 0)
-sideScrollingFrame.Position = UDim2.new(0, 0, 0.1, 0)
-sideScrollingFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 29)
-sideScrollingFrame.BorderSizePixel = 0
-sideScrollingFrame.ScrollBarThickness = 2
-sideScrollingFrame.CanvasSize = UDim2.new(0, 0, 5, 0)
-sideScrollingFrame.Parent = main
+        return sections
+    end
 
--- Content ScrollingFrame
-local contentScrollingFrame = Instance.new("ScrollingFrame")
-contentScrollingFrame.Size = UDim2.new(0.70, 0, 0.9, 0)
-contentScrollingFrame.Position = UDim2.new(0.30, 0, 0.1, 0)
-contentScrollingFrame.BackgroundColor3 = Color3.fromRGB(23, 21, 17)
-contentScrollingFrame.BorderSizePixel = 0
-contentScrollingFrame.ScrollBarThickness = 2
-contentScrollingFrame.CanvasSize = UDim2.new(0, 0, 5, 0)
-contentScrollingFrame.Parent = main
+    return tabs
+end
+
+return Unstable
