@@ -1,148 +1,159 @@
--- own personal used 
--- Unstable
+-- own personal used
+
 local Unstable = {}
 
+-- Create a new window with a top bar, minimize, and destroy buttons
 function Unstable.CreateLib(title, theme)
-    local gui = Instance.new("ScreenGui")
-    gui.Name = title
-    gui.ResetOnSpawn = false
-    gui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+    -- Destroy existing GUI
+    local existingGui = game:GetService("Players").LocalPlayer:FindFirstChild("PlayerGui"):FindFirstChild("UnstableLibrary")
+    if existingGui then
+        existingGui:Destroy()
+    end
 
+    -- ScreenGui
+    local gui = Instance.new("ScreenGui")
+    gui.Name = "UnstableLibrary"
+    gui.ResetOnSpawn = false
+    gui.Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
+
+    -- Main Frame
     local mainFrame = Instance.new("Frame")
     mainFrame.Size = UDim2.new(0.6, 0, 0.7, 0)
     mainFrame.Position = UDim2.new(0.2, 0, 0.15, 0)
     mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    mainFrame.BorderSizePixel = 0
     mainFrame.Parent = gui
 
-    local tabs = {}
+    local uiCorner = Instance.new("UICorner")
+    uiCorner.CornerRadius = UDim.new(0.02, 0)
+    uiCorner.Parent = mainFrame
 
-    function tabs:NewTab(tabName)
-        local tabFrame = Instance.new("Frame")
-        tabFrame.Size = UDim2.new(1, 0, 1, 0)
-        tabFrame.BackgroundTransparency = 1
-        tabFrame.Visible = false
-        tabFrame.Parent = mainFrame
+    -- Top Bar
+    local topBar = Instance.new("Frame")
+    topBar.Size = UDim2.new(1, 0, 0.1, 0)
+    topBar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    topBar.BorderSizePixel = 0
+    topBar.Parent = mainFrame
 
-        local sections = {}
+    local topBarLabel = Instance.new("TextLabel")
+    topBarLabel.Size = UDim2.new(0.8, 0, 1, 0)
+    topBarLabel.Position = UDim2.new(0.05, 0, 0, 0)
+    topBarLabel.Text = title
+    topBarLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    topBarLabel.Font = Enum.Font.GothamBold
+    topBarLabel.TextScaled = true
+    topBarLabel.BackgroundTransparency = 1
+    topBarLabel.Parent = topBar
 
-        function sections:NewSection(sectionName)
-            local sectionFrame = Instance.new("Frame")
-            sectionFrame.Size = UDim2.new(1, 0, 0, 100)
-            sectionFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-            sectionFrame.Parent = tabFrame
+    -- Destroy Button
+    local destroyButton = Instance.new("TextButton")
+    destroyButton.Size = UDim2.new(0.1, 0, 1, 0)
+    destroyButton.Position = UDim2.new(0.9, 0, 0, 0)
+    destroyButton.BackgroundTransparency = 1
+    destroyButton.Text = "X"
+    destroyButton.TextColor3 = Color3.fromRGB(255, 100, 100)
+    destroyButton.Font = Enum.Font.GothamBold
+    destroyButton.TextScaled = true
+    destroyButton.Parent = topBar
+    destroyButton.MouseButton1Click:Connect(function()
+        gui:Destroy()
+    end)
 
-            local content = {}
+    -- Minimize Button
+    local minimizeButton = Instance.new("TextButton")
+    minimizeButton.Size = UDim2.new(0.1, 0, 1, 0)
+    minimizeButton.Position = UDim2.new(0.8, 0, 0, 0)
+    minimizeButton.BackgroundTransparency = 1
+    minimizeButton.Text = "-"
+    minimizeButton.TextColor3 = Color3.fromRGB(200, 200, 200)
+    minimizeButton.Font = Enum.Font.GothamBold
+    minimizeButton.TextScaled = true
+    minimizeButton.Parent = topBar
 
-            -- Create Button
-            function content:NewButton(buttonText, info, callback)
-                local button = Instance.new("TextButton")
-                button.Size = UDim2.new(0.8, 0, 0, 30)
-                button.Position = UDim2.new(0.1, 0, 0, 10)
-                button.Text = buttonText
-                button.Parent = sectionFrame
+    local minimizedFrame = Instance.new("Frame")
+    minimizedFrame.Size = UDim2.new(0.1, 0, 0.1, 0)
+    minimizedFrame.Position = UDim2.new(0.05, 0, 0.05, 0)
+    minimizedFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    minimizedFrame.Visible = false
+    minimizedFrame.Parent = gui
 
-                button.MouseButton1Click:Connect(callback)
-            end
+    local expandButton = Instance.new("TextButton")
+    expandButton.Size = UDim2.new(1, 0, 1, 0)
+    expandButton.Text = "+"
+    expandButton.TextScaled = true
+    expandButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    expandButton.Font = Enum.Font.GothamBold
+    expandButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    expandButton.Parent = minimizedFrame
+    expandButton.MouseButton1Click:Connect(function()
+        mainFrame.Visible = true
+        minimizedFrame.Visible = false
+    end)
 
-            -- Create Slider
-            function content:NewSlider(sliderText, info, maxValue, minValue, callback)
-                local sliderFrame = Instance.new("Frame")
-                sliderFrame.Size = UDim2.new(0.8, 0, 0, 50)
-                sliderFrame.Position = UDim2.new(0.1, 0, 40, 0)
-                sliderFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-                sliderFrame.Parent = sectionFrame
+    minimizeButton.MouseButton1Click:Connect(function()
+        mainFrame.Visible = false
+        minimizedFrame.Visible = true
+    end)
 
-                local slider = Instance.new("TextLabel")
-                slider.Size = UDim2.new(1, 0, 0.5, 0)
-                slider.Position = UDim2.new(0, 0, 0, 0)
-                slider.Text = sliderText
-                slider.Parent = sliderFrame
+    -- Side ScrollingFrame
+    local sideScrollingFrame = Instance.new("ScrollingFrame")
+    sideScrollingFrame.Size = UDim2.new(0.3, 0, 0.9, 0)
+    sideScrollingFrame.Position = UDim2.new(0, 0, 0.1, 0)
+    sideScrollingFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    sideScrollingFrame.BorderSizePixel = 0
+    sideScrollingFrame.ScrollBarThickness = 4
+    sideScrollingFrame.CanvasSize = UDim2.new(0, 0, 5, 0)
+    sideScrollingFrame.Parent = mainFrame
 
-                local sliderBar = Instance.new("Frame")
-                sliderBar.Size = UDim2.new(1, 0, 0.5, 0)
-                sliderBar.Position = UDim2.new(0, 0, 0.5, 0)
-                sliderBar.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-                sliderBar.Parent = sliderFrame
+    local sideLayout = Instance.new("UIListLayout")
+    sideLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    sideLayout.Parent = sideScrollingFrame
 
-                local input = Instance.new("TextBox")
-                input.Size = UDim2.new(0.2, 0, 0.5, 0)
-                input.Position = UDim2.new(0.8, 0, 0, 0)
-                input.Text = tostring(minValue)
-                input.Parent = sliderFrame
+    -- Content ScrollingFrame
+    local contentScrollingFrame = Instance.new("ScrollingFrame")
+    contentScrollingFrame.Size = UDim2.new(0.7, 0, 0.9, 0)
+    contentScrollingFrame.Position = UDim2.new(0.3, 0, 0.1, 0)
+    contentScrollingFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    contentScrollingFrame.BorderSizePixel = 0
+    contentScrollingFrame.ScrollBarThickness = 4
+    contentScrollingFrame.CanvasSize = UDim2.new(0, 0, 5, 0)
+    contentScrollingFrame.Parent = mainFrame
 
-                input.FocusLost:Connect(function()
-                    local value = tonumber(input.Text)
-                    if value then
-                        callback(value)
-                    end
-                end)
-            end
+    local contentLayout = Instance.new("UIListLayout")
+    contentLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    contentLayout.Parent = contentScrollingFrame
 
-            -- Create Dropdown
-            function content:NewDropdown(dropdownText, info, options, callback)
-                local dropdownFrame = Instance.new("Frame")
-                dropdownFrame.Size = UDim2.new(0.8, 0, 0, 50)
-                dropdownFrame.Position = UDim2.new(0.1, 0, 100, 0)
-                dropdownFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-                dropdownFrame.Parent = sectionFrame
+    return {
+        SideFrame = sideScrollingFrame,
+        ContentFrame = contentScrollingFrame,
+        Destroy = function() gui:Destroy() end
+    }
+end
 
-                local dropdownLabel = Instance.new("TextLabel")
-                dropdownLabel.Size = UDim2.new(1, 0, 0.5, 0)
-                dropdownLabel.Text = dropdownText
-                dropdownLabel.Parent = dropdownFrame
-
-                local dropdownMenu = Instance.new("Frame")
-                dropdownMenu.Size = UDim2.new(1, 0, 1, 0)
-                dropdownMenu.Position = UDim2.new(0, 0, 0.5, 0)
-                dropdownMenu.Parent = dropdownFrame
-
-                for _, option in ipairs(options) do
-                    local optionButton = Instance.new("TextButton")
-                    optionButton.Size = UDim2.new(1, 0, 0.2, 0)
-                    optionButton.Text = option
-                    optionButton.Parent = dropdownMenu
-
-                    optionButton.MouseButton1Click:Connect(function()
-                        callback(option)
-                    end)
-                end
-            end
-
--- Create Label
-function content:NewLabel(labelText)
+-- Example Functions (Buttons, Labels, etc.)
+function Unstable:NewLabel(parent, text)
     local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(0.8, 0, 0, 30)
-    label.Position = UDim2.new(0.1, 0, 0, 0)
-    label.BackgroundTransparency = 1
-    label.Text = labelText
+    label.Size = UDim2.new(1, 0, 0, 50)
+    label.Text = text
     label.TextColor3 = Color3.fromRGB(255, 255, 255)
     label.Font = Enum.Font.Gotham
-    label.TextScaled = true
-    label.Parent = sectionFrame
+    label.BackgroundTransparency = 1
+    label.Parent = parent
+    return label
 end
 
-            -- Create TextBox
-            function content:NewTextBox(placeholderText, info, callback)
-                local textBox = Instance.new("TextBox")
-                textBox.Size = UDim2.new(0.8, 0, 0, 30)
-                textBox.Position = UDim2.new(0.1, 0, 150, 0)
-                textBox.PlaceholderText = placeholderText
-                textBox.Parent = sectionFrame
-
-                textBox.FocusLost:Connect(function(enterPressed)
-                    if enterPressed then
-                        callback(textBox.Text)
-                    end
-                end)
-            end
-
-            return content
-        end
-
-        return sections
-    end
-
-    return tabs
+function Unstable:NewButton(parent, text, callback)
+    local button = Instance.new("TextButton")
+    button.Size = UDim2.new(1, 0, 0, 50)
+    button.Text = text
+    button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    button.Font = Enum.Font.Gotham
+    button.BackgroundTransparency = 1
+    button.Parent = parent
+    button.MouseButton1Click:Connect(callback)
+    return button
 end
+
+-- Add other functions for toggles, sliders, dropdowns, etc.
 
 return Unstable
