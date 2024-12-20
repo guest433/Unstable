@@ -1,159 +1,307 @@
--- own personal used
-
 local Unstable = {}
 
--- Create a new window with a top bar, minimize, and destroy buttons
-function Unstable.CreateLib(title, theme)
-    -- Destroy existing GUI
-    local existingGui = game:GetService("Players").LocalPlayer:FindFirstChild("PlayerGui"):FindFirstChild("UnstableLibrary")
-    if existingGui then
-        existingGui:Destroy()
-    end
+-- Themes
+Unstable.Themes = {
+    Dark = {
+        Background = Color3.fromRGB(25, 25, 25),
+        Accent = Color3.fromRGB(50, 50, 50),
+        Text = Color3.fromRGB(255, 255, 255),
+        Button = Color3.fromRGB(30, 30, 30)
+    },
+    Light = {
+        Background = Color3.fromRGB(240, 240, 240),
+        Accent = Color3.fromRGB(200, 200, 200),
+        Text = Color3.fromRGB(0, 0, 0),
+        Button = Color3.fromRGB(220, 220, 220)
+    }
+}
 
-    -- ScreenGui
-    local gui = Instance.new("ScreenGui")
-    gui.Name = "UnstableLibrary"
-    gui.ResetOnSpawn = false
-    gui.Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
+-- Initialize the UI
+function Unstable:Create(config)
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = config.Name or "Unstable"
+    screenGui.ResetOnSpawn = false
+    screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 
-    -- Main Frame
     local mainFrame = Instance.new("Frame")
-    mainFrame.Size = UDim2.new(0.6, 0, 0.7, 0)
-    mainFrame.Position = UDim2.new(0.2, 0, 0.15, 0)
-    mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    mainFrame.Size = config.Size or UDim2.fromOffset(600, 400)
+    mainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+    mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+    mainFrame.BackgroundColor3 = config.Theme.Background
     mainFrame.BorderSizePixel = 0
-    mainFrame.Parent = gui
+    mainFrame.Active = true
+    mainFrame.Draggable = true
+    mainFrame.Parent = screenGui
 
     local uiCorner = Instance.new("UICorner")
-    uiCorner.CornerRadius = UDim.new(0.02, 0)
+    uiCorner.CornerRadius = UDim.new(0.1, 0)
     uiCorner.Parent = mainFrame
 
-    -- Top Bar
-    local topBar = Instance.new("Frame")
-    topBar.Size = UDim2.new(1, 0, 0.1, 0)
-    topBar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    topBar.BorderSizePixel = 0
-    topBar.Parent = mainFrame
+    local ui = {MainFrame = mainFrame, ScreenGui = screenGui, Tabs = {}, Theme = config.Theme}
+    setmetatable(ui, {__index = self})
 
-    local topBarLabel = Instance.new("TextLabel")
-    topBarLabel.Size = UDim2.new(0.8, 0, 1, 0)
-    topBarLabel.Position = UDim2.new(0.05, 0, 0, 0)
-    topBarLabel.Text = title
-    topBarLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    topBarLabel.Font = Enum.Font.GothamBold
-    topBarLabel.TextScaled = true
-    topBarLabel.BackgroundTransparency = 1
-    topBarLabel.Parent = topBar
-
-    -- Destroy Button
-    local destroyButton = Instance.new("TextButton")
-    destroyButton.Size = UDim2.new(0.1, 0, 1, 0)
-    destroyButton.Position = UDim2.new(0.9, 0, 0, 0)
-    destroyButton.BackgroundTransparency = 1
-    destroyButton.Text = "X"
-    destroyButton.TextColor3 = Color3.fromRGB(255, 100, 100)
-    destroyButton.Font = Enum.Font.GothamBold
-    destroyButton.TextScaled = true
-    destroyButton.Parent = topBar
-    destroyButton.MouseButton1Click:Connect(function()
-        gui:Destroy()
-    end)
-
-    -- Minimize Button
-    local minimizeButton = Instance.new("TextButton")
-    minimizeButton.Size = UDim2.new(0.1, 0, 1, 0)
-    minimizeButton.Position = UDim2.new(0.8, 0, 0, 0)
-    minimizeButton.BackgroundTransparency = 1
-    minimizeButton.Text = "-"
-    minimizeButton.TextColor3 = Color3.fromRGB(200, 200, 200)
-    minimizeButton.Font = Enum.Font.GothamBold
-    minimizeButton.TextScaled = true
-    minimizeButton.Parent = topBar
-
-    local minimizedFrame = Instance.new("Frame")
-    minimizedFrame.Size = UDim2.new(0.1, 0, 0.1, 0)
-    minimizedFrame.Position = UDim2.new(0.05, 0, 0.05, 0)
-    minimizedFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-    minimizedFrame.Visible = false
-    minimizedFrame.Parent = gui
-
-    local expandButton = Instance.new("TextButton")
-    expandButton.Size = UDim2.new(1, 0, 1, 0)
-    expandButton.Text = "+"
-    expandButton.TextScaled = true
-    expandButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    expandButton.Font = Enum.Font.GothamBold
-    expandButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    expandButton.Parent = minimizedFrame
-    expandButton.MouseButton1Click:Connect(function()
-        mainFrame.Visible = true
-        minimizedFrame.Visible = false
-    end)
-
-    minimizeButton.MouseButton1Click:Connect(function()
-        mainFrame.Visible = false
-        minimizedFrame.Visible = true
-    end)
-
-    -- Side ScrollingFrame
-    local sideScrollingFrame = Instance.new("ScrollingFrame")
-    sideScrollingFrame.Size = UDim2.new(0.3, 0, 0.9, 0)
-    sideScrollingFrame.Position = UDim2.new(0, 0, 0.1, 0)
-    sideScrollingFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    sideScrollingFrame.BorderSizePixel = 0
-    sideScrollingFrame.ScrollBarThickness = 4
-    sideScrollingFrame.CanvasSize = UDim2.new(0, 0, 5, 0)
-    sideScrollingFrame.Parent = mainFrame
-
-    local sideLayout = Instance.new("UIListLayout")
-    sideLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    sideLayout.Parent = sideScrollingFrame
-
-    -- Content ScrollingFrame
-    local contentScrollingFrame = Instance.new("ScrollingFrame")
-    contentScrollingFrame.Size = UDim2.new(0.7, 0, 0.9, 0)
-    contentScrollingFrame.Position = UDim2.new(0.3, 0, 0.1, 0)
-    contentScrollingFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-    contentScrollingFrame.BorderSizePixel = 0
-    contentScrollingFrame.ScrollBarThickness = 4
-    contentScrollingFrame.CanvasSize = UDim2.new(0, 0, 5, 0)
-    contentScrollingFrame.Parent = mainFrame
-
-    local contentLayout = Instance.new("UIListLayout")
-    contentLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    contentLayout.Parent = contentScrollingFrame
-
-    return {
-        SideFrame = sideScrollingFrame,
-        ContentFrame = contentScrollingFrame,
-        Destroy = function() gui:Destroy() end
-    }
+    return ui
 end
 
--- Example Functions (Buttons, Labels, etc.)
-function Unstable:NewLabel(parent, text)
-    local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(1, 0, 0, 50)
-    label.Text = text
-    label.TextColor3 = Color3.fromRGB(255, 255, 255)
-    label.Font = Enum.Font.Gotham
-    label.BackgroundTransparency = 1
-    label.Parent = parent
-    return label
+-- Create a Tab
+function Unstable:Tab(config)
+    local tabFrame = Instance.new("Frame")
+    tabFrame.Name = config.Name or "New Tab"
+    tabFrame.Size = UDim2.new(1, 0, 0.9, 0)
+    tabFrame.BackgroundTransparency = 1
+    tabFrame.Visible = #self.Tabs == 0
+    tabFrame.Parent = self.MainFrame
+
+    table.insert(self.Tabs, tabFrame)
+
+    return setmetatable({Parent = tabFrame, Theme = self.Theme}, {__index = self})
 end
 
-function Unstable:NewButton(parent, text, callback)
+-- Create a Button
+function Unstable:Button(config)
     local button = Instance.new("TextButton")
-    button.Size = UDim2.new(1, 0, 0, 50)
-    button.Text = text
-    button.TextColor3 = Color3.fromRGB(255, 255, 255)
-    button.Font = Enum.Font.Gotham
-    button.BackgroundTransparency = 1
-    button.Parent = parent
-    button.MouseButton1Click:Connect(callback)
+    button.Size = config.Size or UDim2.new(0.4, 0, 0.1, 0)
+    button.Position = config.Position or UDim2.new(0.3, 0, 0.1 * #self.Parent:GetChildren(), 0)
+    button.Text = config.Name or "Button"
+    button.BackgroundColor3 = self.Theme.Button
+    button.TextColor3 = self.Theme.Text
+    button.TextScaled = true
+    button.Parent = self.Parent
+
+    local uiCorner = Instance.new("UICorner")
+    uiCorner.CornerRadius = UDim.new(0.1, 0)
+    uiCorner.Parent = button
+
+    if config.Callback then
+        button.MouseButton1Click:Connect(config.Callback)
+    end
+
     return button
 end
 
--- Add other functions for toggles, sliders, dropdowns, etc.
+-- Create a Toggle
+function Unstable:Toggle(config)
+    local toggleFrame = Instance.new("Frame")
+    toggleFrame.Size = config.Size or UDim2.new(0.4, 0, 0.1, 0)
+    toggleFrame.BackgroundColor3 = self.Theme.Button
+    toggleFrame.Parent = self.Parent
+
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(0.7, 0, 1, 0)
+    label.Text = config.Name or "Toggle"
+    label.TextColor3 = self.Theme.Text
+    label.BackgroundTransparency = 1
+    label.TextScaled = true
+    label.Parent = toggleFrame
+
+    local toggleButton = Instance.new("TextButton")
+    toggleButton.Size = UDim2.new(0.3, 0, 0.8, 0)
+    toggleButton.Position = UDim2.new(0.7, 0, 0.1, 0)
+    toggleButton.Text = "Off"
+    toggleButton.BackgroundColor3 = self.Theme.Accent
+    toggleButton.TextColor3 = self.Theme.Text
+    toggleButton.TextScaled = true
+    toggleButton.Parent = toggleFrame
+
+    local state = false
+    toggleButton.MouseButton1Click:Connect(function()
+        state = not state
+        toggleButton.Text = state and "On" or "Off"
+        if config.Callback then
+            config.Callback(state)
+        end
+    end)
+
+    return toggleFrame
+end
+
+-- Create a Textbox
+function Unstable:Textbox(config)
+    local textbox = Instance.new("TextBox")
+    textbox.Size = config.Size or UDim2.new(0.4, 0, 0.1, 0)
+    textbox.Position = config.Position or UDim2.new(0.3, 0, 0.1 * #self.Parent:GetChildren(), 0)
+    textbox.PlaceholderText = config.Name or "Enter Text"
+    textbox.BackgroundColor3 = self.Theme.Button
+    textbox.TextColor3 = self.Theme.Text
+    textbox.TextScaled = true
+    textbox.ClearTextOnFocus = false
+    textbox.Parent = self.Parent
+
+    if config.Callback then
+        textbox.FocusLost:Connect(function(enterPressed)
+            if enterPressed then
+                config.Callback(textbox.Text)
+            end
+        end)
+    end
+
+    return textbox
+end
+
+-- Create a Dropdown
+function Unstable:Dropdown(config)
+    local dropdown = Instance.new("TextButton")
+    dropdown.Size = config.Size or UDim2.new(0.4, 0, 0.1, 0)
+    dropdown.Position = config.Position or UDim2.new(0.3, 0, 0.1 * #self.Parent:GetChildren(), 0)
+    dropdown.Text = config.Name or "Select..."
+    dropdown.BackgroundColor3 = self.Theme.Button
+    dropdown.TextColor3 = self.Theme.Text
+    dropdown.TextScaled = true
+    dropdown.Parent = self.Parent
+
+    local items = config.Items or {}
+    dropdown.MouseButton1Click:Connect(function()
+        print("Dropdown items:", table.concat(items, ", "))
+        if config.Callback then
+            config.Callback(items[1]) -- Example: return the first item
+        end
+    end)
+
+    return dropdown
+end
+
+-- Create a Slider
+function Unstable:Slider(config)
+    local sliderFrame = Instance.new("Frame")
+    sliderFrame.Size = config.Size or UDim2.new(0.4, 0, 0.1, 0)
+    sliderFrame.BackgroundColor3 = self.Theme.Button
+    sliderFrame.Parent = self.Parent
+
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(0.3, 0, 1, 0)
+    label.Text = config.Name or "Slider"
+    label.TextColor3 = self.Theme.Text
+    label.BackgroundTransparency = 1
+    label.TextScaled = true
+    label.Parent = sliderFrame
+
+    local slider = Instance.new("TextButton")
+    slider.Size = UDim2.new(0.7, 0, 0.5, 0)
+    slider.Position = UDim2.new(0.3, 0, 0.25, 0)
+    slider.BackgroundColor3 = self.Theme.Accent
+    slider.TextColor3 = self.Theme.Text
+    slider.Text = tostring(config.Default or 0)
+    slider.TextScaled = true
+    slider.Parent = sliderFrame
+
+    local value = config.Default or 0
+    slider.MouseButton1Click:Connect(function()
+        value = math.clamp(value + 1, config.Min or 0, config.Max or 100)
+        slider.Text = tostring(value)
+        if config.Callback then
+            config.Callback(value)
+        end
+    end)
+
+    return sliderFrame
+end
+
+-- Create a Keybind
+function Unstable:Keybind(config)
+    local keybindButton = Instance.new("TextButton")
+    keybindButton.Size = config.Size or UDim2.new(0.4, 0, 0.1, 0)
+    keybindButton.Position = config.Position or UDim2.new(0.3, 0, 0.1 * #self.Parent:GetChildren(), 0)
+    keybindButton.Text = config.Name or "Keybind"
+    keybindButton.BackgroundColor3 = self.Theme.Button
+    keybindButton.TextColor3 = self.Theme.Text
+    keybindButton.TextScaled = true
+    keybindButton.Parent = self.Parent
+
+    local key = config.Keybind or Enum.KeyCode.E
+    keybindButton.MouseButton1Click:Connect(function()
+        print("Press any key to bind...")
+        local inputConnection
+        inputConnection = game:GetService("UserInputService").InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.Keyboard then
+                key = input.KeyCode
+                keybindButton.Text = tostring(key)
+                if config.Callback then
+                    config.Callback(key)
+                end
+                inputConnection:Disconnect()
+            end
+        end)
+    end)
+
+    return keybindButton
+end
+
+-- Create a Prompt
+function Unstable:Prompt(config)
+    local promptFrame = Instance.new("Frame")
+    promptFrame.Size = config.Size or UDim2.new(0.5, 0, 0.3, 0)
+    promptFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+    promptFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+    promptFrame.BackgroundColor3 = self.Theme.Button
+    promptFrame.Parent = self.MainFrame
+
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, 0, 0.6, 0)
+    label.Text = config.Title or "Prompt"
+    label.TextColor3 = self.Theme.Text
+    label.BackgroundTransparency = 1
+    label.TextScaled = true
+    label.Parent = promptFrame
+
+    local buttonFrame = Instance.new("Frame")
+    buttonFrame.Size = UDim2.new(1, 0, 0.4, 0)
+    buttonFrame.Position = UDim2.new(0, 0, 0.6, 0)
+    buttonFrame.BackgroundTransparency = 1
+    buttonFrame.Parent = promptFrame
+
+    for name, callback in pairs(config.Buttons or {}) do
+        local button = Instance.new("TextButton")
+        button.Size = UDim2.new(0.5, -5, 1, 0)
+        button.Text = name
+        button.TextScaled = true
+        button.BackgroundColor3 = self.Theme.Accent
+        button.TextColor3 = self.Theme.Text
+        button.Parent = buttonFrame
+
+        button.MouseButton1Click:Connect(function()
+            callback()
+            promptFrame:Destroy()
+        end)
+    end
+
+    return promptFrame
+end
+
+-- Create a Notification
+function Unstable:Notification(config)
+    local notification = Instance.new("TextLabel")
+    notification.Size = config.Size or UDim2.new(0.3, 0, 0.1, 0)
+    notification.Position = UDim2.new(0.5, 0, 0, -50)
+    notification.AnchorPoint = Vector2.new(0.5, 0.5)
+    notification.BackgroundColor3 = self.Theme.Button
+    notification.TextColor3 = self.Theme.Text
+    notification.Text = config.Text or "Notification"
+    notification.TextScaled = true
+    notification.Parent = self.MainFrame
+
+    task.delay(config.Duration or 3, function()
+        notification:Destroy()
+        if config.Callback then
+            config.Callback()
+        end
+    end)
+
+    return notification
+end
+
+-- Create a Credit
+function Unstable:Credit(config)
+    local creditLabel = Instance.new("TextLabel")
+    creditLabel.Size = config.Size or UDim2.new(1, 0, 0.1, 0)
+    creditLabel.Position = config.Position or UDim2.new(0, 0, 1, -50)
+    creditLabel.BackgroundTransparency = 1
+    creditLabel.Text = (config.Name or "Unknown") .. " - " .. (config.Description or "Contributor")
+    creditLabel.TextColor3 = self.Theme.Text
+    creditLabel.TextScaled = true
+    creditLabel.Parent = self.MainFrame
+
+    return creditLabel
+
+end
 
 return Unstable
